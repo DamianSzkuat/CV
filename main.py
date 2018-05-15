@@ -3,6 +3,7 @@ import cv2
 
 from gui.radiographFrame import RadiographFrame
 from src.dataHandler import DataHandler
+from src.procrustes import Procrustes
 
 
 class MainApp(tk.Tk):
@@ -29,11 +30,24 @@ class MainApp(tk.Tk):
 
         self.showRadiograph()
 
-        self.button = tk.Button(self.buttonContainer, text="Next Radiograph", command=self.showNextRadiograph)
-        self.button.grid(row=0, column=1, sticky="nsew", padx=(20,0))
+        self.next_button = tk.Button(self.buttonContainer,
+                                     text="Next Radiograph",
+                                     command=self.showNextRadiograph)
+        self.next_button.grid(row=0, column=1, sticky="nsew", padx=(20,0))
 
-        self.hi_there = tk.Button(self.buttonContainer, text="Previous Radiograph", command=self.showPreviousRadiograph)
-        self.hi_there.grid(row=1, column=1, sticky="nsew", pady=(0, 500), padx=(20,0))
+        self.prev_button = tk.Button(self.buttonContainer,
+                                     text="Previous Radiograph",
+                                     command=self.showPreviousRadiograph)
+        self.prev_button.grid(row=1, column=1, sticky="nsew", pady=(0, 20), padx=(20,0))
+
+        self.procrustes_button = tk.Button(self.buttonContainer,
+                                           text="Perform initial procrustes analysis",
+                                           command=self.performInitialProcrustes)
+        self.procrustes_button.grid(row=3, column=1, sticky="nsew", pady=(0, 500), padx=(20,0))
+
+    def performInitialProcrustes(self):
+        self.procrustes = Procrustes(self.dataHandler)
+        self.procrustes.performProcrustesAlignment()
 
     def showNextRadiograph(self):
         if self.currentRadiograph < self.dataHandler.getNBofRadiographs() - 1:
@@ -79,6 +93,10 @@ class MainApp(tk.Tk):
                             y_2 = int(tooth.getLandmarks()[0][1])
                         
                         cv2.line(img, (x ,y), (x_2, y_2), (255,0,0))
+
+                    # Draw center
+                    center = tooth.getCenter()
+                    cv2.circle(img, (int(center[0]), int(center[1])), 5, (0,0,255), 2)
 
             radioImages.append(RadiographFrame(self.imgContainer, img))
 
