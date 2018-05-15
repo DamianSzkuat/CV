@@ -1,4 +1,6 @@
 import tkinter as tk
+import cv2
+
 from gui.radiographFrame import RadiographFrame
 from src.dataHandler import DataHandler
 
@@ -23,10 +25,7 @@ class MainApp(tk.Tk):
 
         # Load data
         self.dataHandler = DataHandler()
-        self.radioImages = list()
-        for radiograph in self.dataHandler.getRadiographs():
-            img = radiograph.getImage()
-            self.radioImages.append(RadiographFrame(self.imgContainer, img))
+        self.radioImages = self.createRadiographFrames(drawLandmarks=True)
 
         self.showRadiograph()
 
@@ -55,6 +54,35 @@ class MainApp(tk.Tk):
     def showRadiograph(self):
         frame = self.radioImages[self.currentRadiograph]
         frame.tkraise()
+
+    def createRadiographFrames(self, drawLandmarks=False):
+        radioImages = list()
+        for radiograph in self.dataHandler.getRadiographs():
+            img = radiograph.getImage()
+
+            if drawLandmarks:
+                img = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
+                teeth = radiograph.getTeeth()
+                for tooth in teeth:
+                    for i in range(40):
+                        # Draw Circles
+                        x = int(tooth.getLandmarks()[i][0])
+                        y = int(tooth.getLandmarks()[i][1])
+                        cv2.circle(img, (x, y), 1, (0,255,0), 1)
+
+                        # Draw line connecting the circles
+                        if i < 39:
+                            x_2 = int(tooth.getLandmarks()[i+1][0])
+                            y_2 = int(tooth.getLandmarks()[i+1][1])
+                        else: 
+                            x_2 = int(tooth.getLandmarks()[0][0])
+                            y_2 = int(tooth.getLandmarks()[0][1])
+                        
+                        cv2.line(img, (x ,y), (x_2, y_2), (255,0,0))
+
+            radioImages.append(RadiographFrame(self.imgContainer, img))
+
+        return radioImages
 
 
 if __name__ == '__main__':

@@ -1,5 +1,6 @@
 import numpy as np
 import cv2
+from copy import deepcopy
 
 from src.tooth import Tooth
 
@@ -18,7 +19,6 @@ class Radiograph:
         self.radiographID = radiographID
         self.imgPath = './data/Radiographs/%02d.tif' % (self.radiographID + 1)
         self.image = cv2.cvtColor(cv2.imread(self.imgPath), cv2.COLOR_BGR2GRAY)
-        self.downscaleImage()
 
         if hasLandmarks:
             for i in range(self.nb_teeth):
@@ -26,6 +26,8 @@ class Radiograph:
                                              'landmarks%d-%d.txt'
                                              % (radiographID + 1, i + 1))
                 self.teeth.append(Tooth(landmark))
+        
+        self.downscaleImage()
 
     def loadLandmark(self, path):
 
@@ -41,6 +43,12 @@ class Radiograph:
         height = self.image.shape[0]
         width = self.image.shape[1]
         self.image = cv2.resize(self.image, (int(width*scale), int(height*scale)))
+        
+        for tooth in self.teeth:
+            tooth.downscale(scale)
+
+    def getTeeth(self, deepCopy=False):
+        return deepcopy(self.teeth) if deepCopy else self.teeth
 
     def getImage(self):
         return self.image
