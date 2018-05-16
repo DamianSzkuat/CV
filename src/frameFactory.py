@@ -18,10 +18,8 @@ class FrameFactory:
         width = 1280
         for tooth in teeth:
             img = np.zeros((height,width,3), np.uint8)
-            # cv2.circle(img, (int(width/2), int(height/2)), 10, (0,255,0), 5)
             tooth.scale(height*5)
             tooth.translate([width/2, height/2])
-            print("Tooth: " + str(tooth.getLandmarks()))
             img = self._drawToothOnImage(tooth, img)
 
             teethImages.append(SingleToorhFrame(parent, img))

@@ -20,6 +20,7 @@ class Procrustes:
     
     def normalizeFixedShape(self):
         self.fixedTooth.normalize()
+        print("Tooth: " + str(self.fixedTooth.getLandmarks()))
 
     def scaleAndRotateShapes(self):
         for i in range(len(self.teeth)):
