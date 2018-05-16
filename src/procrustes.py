@@ -22,7 +22,7 @@ class Procrustes:
         self.fixedTooth.normalize()
 
     def scaleAndRotateShapes(self):
-        for i in range(len(self.teeth) - 1):
+        for i in range(len(self.teeth)):
             tooth = self.teeth[i]
             a_j = self.calculate_a_j(tooth)
             b_j = self.calculate_b_j(tooth)
@@ -35,7 +35,7 @@ class Procrustes:
         temp = 0
         landmarks_1 = self.fixedTooth.getLandmarks()
         landmarks_j = tooth.getLandmarks()
-        for i in range(len(landmarks_j) - 1):
+        for i in range(len(landmarks_j)):
             x_j = landmarks_j[i][0]
             y_j = landmarks_j[i][1]
             x_1 = landmarks_1[i][0]
@@ -48,7 +48,7 @@ class Procrustes:
         temp = 0
         landmarks_1 = self.fixedTooth.getLandmarks()
         landmarks_j = tooth.getLandmarks()
-        for i in range(len(landmarks_j) - 1):
+        for i in range(len(landmarks_j)):
             x_j = landmarks_j[i][0]
             y_j = landmarks_j[i][1]
             x_1 = landmarks_1[i][0]
