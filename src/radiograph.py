@@ -45,7 +45,7 @@ class Radiograph:
         self.image = cv2.resize(self.image, (int(width*scale), int(height*scale)))
         
         for tooth in self.teeth:
-            tooth.downscale(scale)
+            tooth.scale(scale)
 
     def getTeeth(self, deepCopy=False):
         return deepcopy(self.teeth) if deepCopy else self.teeth

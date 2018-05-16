@@ -10,24 +10,26 @@ class Procrustes:
     
     def performProcrustesAlignment(self):
         self.translateTeethToOrigin()
-        self.normalizeFixesShape()
-        self.scaleAndRotateShape()
+        self.normalizeFixedShape()
+        self.scaleAndRotateShapes()
+        return self.teeth
 
     def translateTeethToOrigin(self):
         for tooth in self.teeth:
             tooth.translate(-tooth.getCenter())
     
-    def normalizeFixesShape(self):
+    def normalizeFixedShape(self):
         self.fixedTooth.normalize()
 
-    def scaleAndRotateShape(self):
+    def scaleAndRotateShapes(self):
         for i in range(len(self.teeth) - 1):
             tooth = self.teeth[i]
             a_j = self.calculate_a_j(tooth)
             b_j = self.calculate_b_j(tooth)
             s_j = self.calculate_s_j(a_j, b_j)
             theta_j = self.calculate_theta_j(a_j, b_j)
-            # TODO
+            tooth.scale(s_j)
+            tooth.rotate(theta_j)
 
     def calculate_a_j(self, tooth):
         temp = 0

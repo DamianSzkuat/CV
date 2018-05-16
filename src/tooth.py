@@ -10,9 +10,16 @@ class Tooth():
     def calculateCenter(self):
         self.center = np.mean(self.landmarks, axis=0)
 
-    def downscale(self, scale):
+    def scale(self, scale):
         self.landmarks *= scale
         self.calculateCenter()
+
+    def rotate(self, theta):
+        c, s = np.cos(theta), np.sin(theta)
+        R = np.array(((c, s), (-s, c)))
+        temp = self.landmarks.transpose()
+        temp = np.dot(R, temp)
+        self.landmarks = temp.transpose()
 
     def translate(self, vec):
         self.landmarks += vec
