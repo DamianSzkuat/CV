@@ -26,4 +26,10 @@ class ButtonContainer(tk.Frame):
         self.procrustes_button = tk.Button(self,
                                            text="Perform initial procrustes analysis",
                                            command=lambda: controller.performInitialProcrustes())
-        self.procrustes_button.grid(row=3, column=1, sticky="ew", pady=(0,500), padx=(20,0))
+        self.procrustes_button.grid(row=3, column=1, sticky="ew", padx=(20,0))
+    
+    def createPCAButton(self, controller):
+        self.PCA_button = tk.Button(self,
+                                    text="Perform PCA",
+                                    command=lambda: controller.perfromPCA())
+        self.PCA_button.grid(row=4, column=1, sticky="ew", pady=(0,500), padx=(20,0))

@@ -1,11 +1,23 @@
 import numpy as np
 
+from src.tooth import Tooth
 
-class Tooth():
 
-    def __init__(self, landmarks):
-        self.landmarks = landmarks
+class TeethSet:
+
+    def __init__(self, teeth):
+        self.teeth = teeth
+        self.landmarks = self.getConcatenatedLandmarks()
+        self.center = None
         self.calculateCenter()
+
+    def getConcatenatedLandmarks(self):
+        teethSet = self.teeth[0].getLandmarks()
+
+        for i in range(1,8):
+            teethSet = np.concatenate((teethSet, self.teeth[i].getLandmarks()))
+        
+        return teethSet
 
     def calculateCenter(self):
         self.center = np.mean(self.landmarks, axis=0)

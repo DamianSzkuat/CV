@@ -4,12 +4,25 @@ from copy import deepcopy
 
 from gui.radiographFrame import RadiographFrame
 from gui.singleToothFrame import SingleToorhFrame
+from gui.teethSetFrame import TeethSetFrame
+from gui.meanModelFrame import MeanModelFrame
+
+from src.tooth import Tooth
 
 
 class FrameFactory:
 
     def __init__(self, dataHandler):
         self.dataHandler = dataHandler
+
+    def createMeanModelImage(self, parent, meanModel):
+        height = 720
+        width = 1280
+        img = np.zeros((height,width,3), np.uint8)
+        cv2.circle(img, (int(width/2), int(height/2)), 100, (0,0,255), 5)
+        font = cv2.FONT_HERSHEY_SIMPLEX
+        cv2.putText(img, "Mean Model", (0,height), font, 4,(255,255,255),2,cv2.LINE_AA)
+        return MeanModelFrame(parent, img)
 
     def createProcrustesAlignedTeethImages(self, parent, alignedTeeth):
         teeth = deepcopy(alignedTeeth)
@@ -23,6 +36,21 @@ class FrameFactory:
             img = self._drawToothOnImage(tooth, img)
 
             teethImages.append(SingleToorhFrame(parent, img))
+        
+        return teethImages
+
+    def createProcrustesAlignedTeethSetImages(self, parent, alignedTeethSets):
+        teethSets = deepcopy(alignedTeethSets)
+        teethImages = list()
+        height = 720
+        width = 1280
+        for teethSet in teethSets:
+            img = np.zeros((height,width,3), np.uint8)
+            teethSet.scale(height*500)
+            teethSet.translate([width/2, height/2])
+            img = self._drawTootSethOnImage(teethSet, img)
+
+            teethImages.append(TeethSetFrame(parent, img))
         
         return teethImages
 
@@ -40,6 +68,16 @@ class FrameFactory:
             radioImages.append(RadiographFrame(parent, img))
 
         return radioImages
+
+    def _drawTootSethOnImage(self, teethSet, img):
+        teeth = list()
+        for i in range(8):
+            start = i*40
+            end = start + 40
+            tooth = Tooth(teethSet.landmarks[start:end])
+            img = self._drawToothOnImage(tooth, img)
+        
+        return img
 
     def _drawToothOnImage(self, tooth, img):
         for i in range(40):

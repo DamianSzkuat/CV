@@ -17,10 +17,28 @@ class DataHandler:
 
             self.radiographs.append(radiograph)
     
+    def getAllTeethSets(self, deepCopy=False):
+        teethSets = list()
+        for radiograph in self.radiographs:
+            teethSets += [(radiograph.getTeethSet(deepCopy=deepCopy))]
+        return teethSets
+
     def getAllTeeth(self, deepCopy=False):
         teeth = list()
         for radiograph in self.radiographs:
             teeth += (radiograph.getTeeth(deepCopy=deepCopy))
+        return teeth
+
+    def getAllUpperTeeth(self, deepCopy=False):
+        teeth = list()
+        for radiograph in self.radiographs:
+            teeth += (radiograph.getUpperTeeth(deepCopy=deepCopy))
+        return teeth
+
+    def getAllLowerTeeth(self, deepCopy=False):
+        teeth = list()
+        for radiograph in self.radiographs:
+            teeth += (radiograph.getLowerTeeth(deepCopy=deepCopy))
         return teeth
 
     def getRadiographs(self):

@@ -3,6 +3,7 @@ import cv2
 from copy import deepcopy
 
 from src.tooth import Tooth
+from src.teethSet import TeethSet
 
 
 class Radiograph:
@@ -14,6 +15,7 @@ class Radiograph:
         self.teeth = list()
         self.nb_teeth = 8
         self.image = None
+        self.teethSet = list()
 
     def loadRadiograph(self, radiographID, hasLandmarks=False):
         self.radiographID = radiographID
@@ -28,6 +30,7 @@ class Radiograph:
                 self.teeth.append(Tooth(landmark))
         
         self.downscaleImage()
+        self.teethSet = TeethSet(self.teeth)
 
     def loadLandmark(self, path):
 
@@ -47,8 +50,18 @@ class Radiograph:
         for tooth in self.teeth:
             tooth.scale(scale)
 
+    def getTeethSet(self, deepCopy=False):
+        return deepcopy(self.teethSet) if deepCopy else self.teethSet
+
+
     def getTeeth(self, deepCopy=False):
         return deepcopy(self.teeth) if deepCopy else self.teeth
+
+    def getUpperTeeth(self, deepCopy=False):
+        return deepcopy(self.teeth[:4]) if deepCopy else self.teeth[:4]
+
+    def getLowerTeeth(self, deepCopy=False):
+        return deepcopy(self.teeth[4:]) if deepCopy else self.teeth[4:]
 
     def getImage(self):
         return self.image

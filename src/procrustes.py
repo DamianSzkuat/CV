@@ -3,12 +3,11 @@ from sklearn.preprocessing import normalize
 import math
 
 class Procrustes:
-
-    def __init__(self, dataHandler):
-        self.teeth = dataHandler.getAllTeeth(deepCopy=True)
-        self.fixedTooth = self.teeth[0]
     
-    def performProcrustesAlignment(self):
+    def performProcrustesAlignment(self, teeth):
+        self.teeth = teeth
+        self.fixedTooth = self.teeth[0]
+
         self.translateTeethToOrigin()
         self.normalizeFixedShape()
         self.scaleAndRotateShapes()
@@ -16,11 +15,12 @@ class Procrustes:
 
     def translateTeethToOrigin(self):
         for tooth in self.teeth:
+            print(str(type(tooth.getCenter())))
             tooth.translate(-tooth.getCenter())
     
     def normalizeFixedShape(self):
         self.fixedTooth.normalize()
-        print("Tooth: " + str(self.fixedTooth.getLandmarks()))
+        # print("Tooth: " + str(self.fixedTooth.getLandmarks()))
 
     def scaleAndRotateShapes(self):
         for i in range(len(self.teeth)):
