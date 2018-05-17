@@ -15,12 +15,10 @@ class Procrustes:
 
     def translateTeethToOrigin(self):
         for tooth in self.teeth:
-            print(str(type(tooth.getCenter())))
             tooth.translate(-tooth.getCenter())
     
     def normalizeFixedShape(self):
         self.fixedTooth.normalize()
-        # print("Tooth: " + str(self.fixedTooth.getLandmarks()))
 
     def scaleAndRotateShapes(self):
         for i in range(len(self.teeth)):
