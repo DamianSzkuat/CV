@@ -1,4 +1,5 @@
 from src.radiograph import Radiograph
+from copy import deepcopy
 
 
 class DataHandler:
@@ -41,8 +42,8 @@ class DataHandler:
             teeth += (radiograph.getLowerTeeth(deepCopy=deepCopy))
         return teeth
 
-    def getRadiographs(self):
-        return self.radiographs
+    def getRadiographs(self, deepCopy=False):
+        return deepcopy(self.radiographs) if deepCopy else self.radiographs
     
     def getNBofRadiographs(self):
         return self.nb_radiographs

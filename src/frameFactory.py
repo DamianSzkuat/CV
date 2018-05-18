@@ -56,7 +56,7 @@ class FrameFactory:
 
     def createRadiographFrames(self, parent, drawLandmarks=False):
         radioImages = list()
-        for radiograph in self.dataHandler.getRadiographs():
+        for radiograph in self.dataHandler.getRadiographs(deepCopy=True):
             img = radiograph.getImage()
 
             if drawLandmarks:
@@ -69,8 +69,14 @@ class FrameFactory:
 
         return radioImages
 
+    def drawTootSethOnFrame(self, parent, radiograph_index, x_co, y_co):
+        # TODO 
+        img = self.dataHandler.getRadiographs(deepCopy=True)[radiograph_index].getImage()
+        img = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
+        cv2.circle(img, (x_co, y_co), 100, (0,255,0), 5)
+        return RadiographFrame(parent, img)
+
     def _drawTootSethOnImage(self, teethSet, img):
-        teeth = list()
         for i in range(8):
             start = i*40
             end = start + 40
