@@ -38,19 +38,25 @@ class ButtonContainer(tk.Frame):
                                                       command=lambda: controller.performManualModelPositionInit())
         self.Model_manual_pos_init_button.grid(row=5, column=1, sticky="ew", padx=(20,0))
         
+        self.Model_pos_accept_button = tk.Button(self,
+                                                 text="Accept model position",
+                                                 command=lambda: controller.acceptModelPosition())
+        self.Model_pos_accept_button.grid(row=6, column=1, sticky="ew", pady=(0,20), padx=(20,0))
+
         self.Model_auto_pos_init_button = tk.Button(self,
                                              text="Automatic position initialization",
                                              command=lambda: controller.performAutoModelPositionInit())
-        self.Model_auto_pos_init_button.grid(row=6, column=1, sticky="ew", padx=(20,0))
+        self.Model_auto_pos_init_button.grid(row=7, column=1, sticky="ew", padx=(20,0))
 
         self.ModelFitting_button = tk.Button(self,
                                              text="Model Fitting",
                                              command=lambda: controller.performModelFitting())
-        self.ModelFitting_button.grid(row=7, column=1, sticky="ew", pady=(0,20), padx=(20,0))
-    
+        self.ModelFitting_button.grid(row=8, column=1, sticky="ew", pady=(0,20), padx=(20,0))
+
+
     def createTeethSwapButtons(self, controller):
         self.teethButtonContainer = tk.Frame(self)
-        self.teethButtonContainer.grid(row=9, column=1, sticky="ew", pady=(0,500), padx=(20,0))
+        self.teethButtonContainer.grid(row=10, column=1, sticky="ew", pady=(0,500), padx=(20,0))
         self.tooth_1_button = tk.Button(self.teethButtonContainer,
                                         text="Tooth 1",
                                         command= lambda: controller.showProcrustesTeethAtIndex(0))

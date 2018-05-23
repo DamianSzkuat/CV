@@ -15,15 +15,6 @@ class FrameFactory:
     def __init__(self, dataHandler):
         self.dataHandler = dataHandler
 
-    def createMeanModelImage(self, parent, meanModel):
-        height = 720
-        width = 1280
-        img = np.zeros((height,width,3), np.uint8)
-        cv2.circle(img, (int(width/2), int(height/2)), 100, (0,0,255), 5)
-        font = cv2.FONT_HERSHEY_SIMPLEX
-        cv2.putText(img, "Mean Model", (0,height), font, 4,(255,255,255),2,cv2.LINE_AA)
-        return MeanModelFrame(parent, img)
-
     def createProcrustesAlignedTeethImages(self, parent, alignedTeeth):
         teeth = deepcopy(alignedTeeth)
         teethImages = list()
@@ -43,7 +34,7 @@ class FrameFactory:
         height = 360
         width = 320
         img = np.zeros((height,width,3), np.uint8)
-        meanTooth = Tooth(meanModel)
+        meanTooth = Tooth(deepcopy(meanModel))
         meanTooth.scale(height)
         meanTooth.translate([width/2, height/2])
         img = self._drawToothOnImage(meanTooth, img)
@@ -80,11 +71,18 @@ class FrameFactory:
 
         return radioImages
 
-    def drawTootSethOnFrame(self, parent, radiograph_index, x_co, y_co):
-        # TODO 
+    def drawToothModelOnFrame(self, parent, radiograph_index, meanModels, model_index, modelLocations):
         img = self.dataHandler.getRadiographs(deepCopy=True)[radiograph_index].getImage()
         img = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
-        cv2.circle(img, (x_co, y_co), 100, (0,255,0), 5)
+
+        for i in range(model_index+1):
+            model = deepcopy(meanModels[i][0])
+            model = Tooth(model)
+            print("Old model center: " + str(model.getCenter()))
+            model.translate(modelLocations[i])
+            print("New model center: " + str(model.getCenter()))
+            img = self._drawToothOnImage(model, img)
+
         return RadiographFrame(parent, img)
 
     def _drawTootSethOnImage(self, teethSet, img):

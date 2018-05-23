@@ -54,16 +54,17 @@ class MainApp(tk.Tk):
         for i in range(8):
             self.meanModels.append(self.pca.do_pca_and_build_model(self.alignedTeeth[i]))
 
-        
-
         self.meanModelContainer = MeanModelContainer(self, self.frameFactory, self.meanModels)
         self.buttonContainer.createImageNavigationButtons(self.meanModelContainer)
 
     def performManualModelPositionInit(self):
         #TODO Model Fitting
-        self.modelFittingContainer = ModelFittingContainer(self, self.frameFactory)
+        self.modelFittingContainer = ModelFittingContainer(self, self.frameFactory, self.meanModels)
         self.buttonContainer.createImageNavigationButtons(self.modelFittingContainer)
     
+    def acceptModelPosition(self):
+        self.modelFittingContainer.nextMeanModel()
+
     def performAutoModelPositionInit(self):
         #TODO
         return None
