@@ -14,7 +14,7 @@ class TeethSet:
     def getConcatenatedLandmarks(self):
         teethSet = self.teeth[0].getLandmarks()
 
-        for i in range(1,8):
+        for i in range(1, 8):
             teethSet = np.concatenate((teethSet, self.teeth[i].getLandmarks()))
         
         return teethSet
@@ -39,6 +39,8 @@ class TeethSet:
 
     def normalize(self):
         self.landmarks = self.landmarks / np.linalg.norm(self.landmarks)
+        # print("Normalized Landmarks: " + str(self.landmarks))
+        # print("Norm of these landmarks: " + str(np.linalg.norm(self.landmarks)))
         self.calculateCenter()
 
     def getLandmarks(self):

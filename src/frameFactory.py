@@ -46,7 +46,7 @@ class FrameFactory:
         width = 1280
         for teethSet in teethSets:
             img = np.zeros((height,width,3), np.uint8)
-            teethSet.scale(height*500)
+            teethSet.scale(height*5)
             teethSet.translate([width/2, height/2])
             img = self._drawTootSethOnImage(teethSet, img)
 

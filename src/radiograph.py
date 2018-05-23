@@ -42,7 +42,7 @@ class Radiograph:
 
         return landmark
     
-    def downscaleImage(self, scale=0.5):
+    def downscaleImage(self, scale=0.4):
         height = self.image.shape[0]
         width = self.image.shape[1]
         self.image = cv2.resize(self.image, (int(width*scale), int(height*scale)))
@@ -52,7 +52,6 @@ class Radiograph:
 
     def getTeethSet(self, deepCopy=False):
         return deepcopy(self.teethSet) if deepCopy else self.teethSet
-
 
     def getTeeth(self, deepCopy=False):
         return deepcopy(self.teeth) if deepCopy else self.teeth
