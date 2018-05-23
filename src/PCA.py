@@ -20,7 +20,15 @@ class PCA:
 
         mean = self.get_image_from_vector(mean, teeth[0].getLandmarks().shape)
 
-        return [mean, eigenvalues, eigenvectors]
+        totalVariance = self.getTotalVariance(eigenvalues)
+
+        print("Nb of eigevalues: " + str(len(eigenvalues)))
+
+        importantEigenvalues, importantEigenvectors = self.getKLangestEigenvalues(eigenvalues, eigenvectors, totalVariance)
+
+        print("Nb of important eigevalues: " + str(len(importantEigenvalues)))
+
+        return [mean, importantEigenvalues, importantEigenvectors]
 
     def pca(self, X, number_of_components):
         # mean
@@ -42,3 +50,19 @@ class PCA:
         img = np.reshape(M, shape, order='A')
 
         return img
+
+    def getTotalVariance(self, eigenvalues):
+        return np.sum(eigenvalues)
+
+    def getKLangestEigenvalues(self, eigenvalues, eigenvectors, totalVariance):
+        importantEigenvalues = [eigenvalues[0]]
+        importantEigenvectors = [eigenvectors[0]]
+
+        i = 0
+        while np.sum(importantEigenvalues)/totalVariance < 0.90:
+            i += 1
+            importantEigenvalues.append(eigenvalues[i])
+            importantEigenvectors.append(eigenvectors[i])
+
+        return importantEigenvalues, importantEigenvectors
+        

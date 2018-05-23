@@ -54,6 +54,8 @@ class MainApp(tk.Tk):
         for i in range(8):
             self.meanModels.append(self.pca.do_pca_and_build_model(self.alignedTeeth[i]))
 
+        
+
         self.meanModelContainer = MeanModelContainer(self, self.frameFactory, self.meanModels)
         self.buttonContainer.createImageNavigationButtons(self.meanModelContainer)
 
