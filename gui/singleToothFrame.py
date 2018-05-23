@@ -3,7 +3,7 @@ from PIL import Image
 from PIL import ImageTk
 
 
-class SingleToorhFrame(tk.Frame):
+class SingleToothFrame(tk.Frame):
 
     def __init__(self, parent, img):
         tk.Frame.__init__(self, parent)

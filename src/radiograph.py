@@ -62,5 +62,8 @@ class Radiograph:
     def getLowerTeeth(self, deepCopy=False):
         return deepcopy(self.teeth[4:]) if deepCopy else self.teeth[4:]
 
+    def getTeethAtIndex(self, idx, deepCopy=False):
+        return deepcopy(self.teeth[idx]) if deepCopy else self.teeth[idx]
+
     def getImage(self):
         return self.image

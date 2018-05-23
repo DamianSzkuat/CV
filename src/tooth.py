@@ -27,8 +27,6 @@ class Tooth():
 
     def normalize(self):
         self.landmarks = self.landmarks / np.linalg.norm(self.landmarks)
-        print("Normalized Landmarks: " + str(self.landmarks))
-        print("Norm of these landmarks: " + str(np.linalg.norm(self.landmarks)))
         self.calculateCenter()
 
     def getLandmarks(self):

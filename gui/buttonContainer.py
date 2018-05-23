@@ -46,6 +46,49 @@ class ButtonContainer(tk.Frame):
         self.ModelFitting_button = tk.Button(self,
                                              text="Model Fitting",
                                              command=lambda: controller.performModelFitting())
-        self.ModelFitting_button.grid(row=7, column=1, sticky="ew", pady=(0,500), padx=(20,0))
+        self.ModelFitting_button.grid(row=7, column=1, sticky="ew", pady=(0,20), padx=(20,0))
+    
+    def createTeethSwapButtons(self, controller):
+        self.teethButtonContainer = tk.Frame(self)
+        self.teethButtonContainer.grid(row=9, column=1, sticky="ew", pady=(0,500), padx=(20,0))
+        self.tooth_1_button = tk.Button(self.teethButtonContainer,
+                                        text="Tooth 1",
+                                        command= lambda: controller.showProcrustesTeethAtIndex(0))
+        self.tooth_1_button.grid(row=0, column=0, sticky="ew")
+
+        self.tooth_2_button = tk.Button(self.teethButtonContainer,
+                                        text="Tooth 2",
+                                        command= lambda: controller.showProcrustesTeethAtIndex(1))
+        self.tooth_2_button.grid(row=0, column=1, sticky="ew")
+
+        self.tooth_3_button = tk.Button(self.teethButtonContainer,
+                                        text="Tooth 3",
+                                        command= lambda: controller.showProcrustesTeethAtIndex(2))
+        self.tooth_3_button.grid(row=0, column=2, sticky="ew")
+
+        self.tooth_4_button = tk.Button(self.teethButtonContainer,
+                                        text="Tooth 4",
+                                        command= lambda: controller.showProcrustesTeethAtIndex(3))
+        self.tooth_4_button.grid(row=0, column=3, sticky="ew")
+
+        self.tooth_5_button = tk.Button(self.teethButtonContainer,
+                                        text="Tooth 5",
+                                        command= lambda: controller.showProcrustesTeethAtIndex(4))
+        self.tooth_5_button.grid(row=1, column=0, sticky="ew")
+
+        self.tooth_6_button = tk.Button(self.teethButtonContainer,
+                                        text="Tooth 6",
+                                        command= lambda: controller.showProcrustesTeethAtIndex(5))
+        self.tooth_6_button.grid(row=1, column=1, sticky="ew")
+
+        self.tooth_7_button = tk.Button(self.teethButtonContainer,
+                                        text="Tooth 7",
+                                        command= lambda: controller.showProcrustesTeethAtIndex(6))
+        self.tooth_7_button.grid(row=1, column=2, sticky="ew")
+
+        self.tooth_8_button = tk.Button(self.teethButtonContainer,
+                                        text="Tooth 8",
+                                        command= lambda: controller.showProcrustesTeethAtIndex(7))
+        self.tooth_8_button.grid(row=1, column=3, sticky="ew")
 
 

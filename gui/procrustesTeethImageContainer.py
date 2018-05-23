@@ -1,9 +1,9 @@
 import tkinter as tk
 
 
-class ProcrustesTeethSetImageContainer(tk.Frame):
+class ProcrustesTeethImageContainer(tk.Frame):
 
-    def __init__(self, parent, frameFactory, alignedTeethSets):
+    def __init__(self, parent, frameFactory, alignedTeeth):
         tk.Frame.__init__(self, parent)
 
         #self.pack(side="left", fill="both", expand=True)
@@ -13,7 +13,7 @@ class ProcrustesTeethSetImageContainer(tk.Frame):
 
         self.frameFactory = frameFactory
         self.currentTeethSet = 0
-        self.teethImages = self.frameFactory.createProcrustesAlignedTeethSetImages(self, alignedTeethSets)
+        self.teethImages = self.frameFactory.createProcrustesAlignedTeethImages(self, alignedTeeth)
         self.show()
     
     def showNext(self):

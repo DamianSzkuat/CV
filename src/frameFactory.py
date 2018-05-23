@@ -3,7 +3,7 @@ import numpy as np
 from copy import deepcopy
 
 from gui.radiographFrame import RadiographFrame
-from gui.singleToothFrame import SingleToorhFrame
+from gui.singleToothFrame import SingleToothFrame
 from gui.teethSetFrame import TeethSetFrame
 from gui.meanModelFrame import MeanModelFrame
 
@@ -31,13 +31,24 @@ class FrameFactory:
         width = 1280
         for tooth in teeth:
             img = np.zeros((height,width,3), np.uint8)
-            tooth.scale(height*5)
+            tooth.scale(height)
             tooth.translate([width/2, height/2])
             img = self._drawToothOnImage(tooth, img)
 
-            teethImages.append(SingleToorhFrame(parent, img))
+            teethImages.append(SingleToothFrame(parent, img))
         
         return teethImages
+
+    def createMeanModelFrame(self, parent, meanModel, col, row):
+        height = 360
+        width = 320
+        img = np.zeros((height,width,3), np.uint8)
+        meanTooth = Tooth(meanModel)
+        meanTooth.scale(height)
+        meanTooth.translate([width/2, height/2])
+        img = self._drawToothOnImage(meanTooth, img)
+        frame = MeanModelFrame(parent, img, row, col)
+        return frame
 
     def createProcrustesAlignedTeethSetImages(self, parent, alignedTeethSets):
         teethSets = deepcopy(alignedTeethSets)
