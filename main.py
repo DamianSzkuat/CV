@@ -1,15 +1,19 @@
 import tkinter as tk
 import cv2
+from copy import deepcopy
 
 from gui.radiographFrameContainer import RadiographFrameContainer
 from gui.procrustesTeethImageContainer import ProcrustesTeethImageContainer
 from gui.buttonContainer import ButtonContainer
 from gui.meanModelContainer import MeanModelContainer
-from gui.modelFittingContainer import ModelFittingContainer
+from gui.manualModelPlacementContainer import ManualModelPlacementContainer
+from gui.autoModelPlacementContainer import AutoModelPlacementContainer
 from src.dataHandler import DataHandler
 from src.procrustes import Procrustes
 from src.frameFactory import FrameFactory
 from src.PCA import PCA
+from src.tooth import Tooth
+from src.modelFitter import ModelFitter
 
 
 class MainApp(tk.Tk):
@@ -59,19 +63,59 @@ class MainApp(tk.Tk):
 
     def performManualModelPositionInit(self):
         #TODO Model Fitting
-        self.modelFittingContainer = ModelFittingContainer(self, self.frameFactory, self.meanModels)
-        self.buttonContainer.createImageNavigationButtons(self.modelFittingContainer)
+        self.manualModelPlacementContainer = ManualModelPlacementContainer(self, self.frameFactory, self.meanModels)
+        self.buttonContainer.createImageNavigationButtons(self.manualModelPlacementContainer)
     
     def acceptModelPosition(self):
-        self.modelFittingContainer.nextMeanModel()
+        self.manualModelPlacementContainer.nextMeanModel()
 
     def performAutoModelPositionInit(self):
-        #TODO
-        return None
+        self.procrustes = Procrustes()
+        radiographs = self.dataHandler.getRadiographs(deepCopy=True)
+        self.initializedMeanModels = list()
+
+        for radiograph in radiographs:
+            teeth = radiograph.getTeeth(deepCopy=True)
+            modelset = list()
+            for i in range(8):
+                tooth = teeth[i]
+                model = deepcopy(self.meanModels[i][0])
+                model = Tooth(model)
+                temp = self.procrustes.allignModelToData(tooth, model)[1]
+                modelset.append(temp)
+            self.initializedMeanModels.append(modelset)
+
+        self.autoModelPlacementContainer = AutoModelPlacementContainer(self, self.frameFactory, self.initializedMeanModels)
+        self.buttonContainer.createImageNavigationButtons(self.autoModelPlacementContainer)
     
     def performModelFitting(self):
-        #TODO
-        return None
+        self.modelFitter = ModelFitter()
+        radiographs = self.dataHandler.getRadiographs(deepCopy=True)
+
+        self.fittedModels = list()
+        for radiograph in radiographs:
+            teeth = radiograph.getTeeth(deepCopy=True)
+            modelset = list()
+            for i in range(8):
+                tooth = deepcopy(teeth[i])
+                model = deepcopy(self.meanModels[i][0])
+                model = Tooth(model)
+                full_model = [model, deepcopy(self.meanModels[i][1]), deepcopy(self.meanModels[i][2])]
+
+                # Fit the model to the radiograph
+                fitted_model = self.modelFitter.fitModel(deepcopy(tooth), full_model)
+
+                # allign fitted model to be drawn
+                temp = self.procrustes.allignModelToData(deepcopy(tooth), fitted_model)[1]
+                modelset.append(temp)
+
+            self.fittedModels.append(modelset)
+        
+        self.autoModelPlacementContainer = AutoModelPlacementContainer(self, self.frameFactory,  self.fittedModels)
+        self.buttonContainer.createImageNavigationButtons(self.autoModelPlacementContainer)
+
+        
+
 
         
 if __name__ == '__main__':

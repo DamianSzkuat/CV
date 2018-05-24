@@ -14,6 +14,24 @@ class Procrustes:
         self.scaleAndRotateShapes()
         return self.teeth
 
+    def allignModelToData(self, tooth, model):
+        self.teeth = [tooth, model]
+        self.fixedTooth = self.teeth[0]
+
+        original_centers = [self.teeth[0].getCenter(), self.teeth[1].getCenter()]
+        self.translateTeethToOrigin()
+
+        # Find rotation and scale
+        self.scaleAndRotateShapes()
+
+        self.teeth[0].translate(original_centers[0])
+        self.teeth[1].translate(original_centers[0])
+
+        return self.teeth
+    
+    def allignDataToModel(self, tooth, model):
+        return self.performProcrustesAlignment([model, tooth])[1]
+        
     def translateTeethToOrigin(self):
         for tooth in self.teeth:
             tooth.translate(-tooth.getCenter())

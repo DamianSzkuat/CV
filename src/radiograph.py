@@ -29,7 +29,7 @@ class Radiograph:
                                              % (radiographID + 1, i + 1))
                 self.teeth.append(Tooth(landmark))
         
-        self.downscaleImage()
+        self.scaleImage(0.4)
         self.teethSet = TeethSet(self.teeth)
 
     def loadLandmark(self, path):
@@ -42,7 +42,7 @@ class Radiograph:
 
         return landmark
     
-    def downscaleImage(self, scale=0.4):
+    def scaleImage(self, scale):
         height = self.image.shape[0]
         width = self.image.shape[1]
         self.image = cv2.resize(self.image, (int(width*scale), int(height*scale)))

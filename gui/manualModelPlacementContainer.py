@@ -2,7 +2,7 @@ import tkinter as tk
 import numpy as np
 
 
-class ModelFittingContainer(tk.Frame):
+class ManualModelPlacementContainer(tk.Frame):
 
     def __init__(self, parent, frameFactory, meanModels):
         tk.Frame.__init__(self, parent)
@@ -25,14 +25,14 @@ class ModelFittingContainer(tk.Frame):
 
     def drawModelOnFrame(self, event=None):
         
-        print("Event.Widget = " + str(event.widget))
+        # print("Event.Widget = " + str(event.widget))
 
         for child in self.winfo_children():
             for child_2 in child.winfo_children():
                 if event.widget == child_2:
                     
-                    print("Self = " + str(self))
-                    print("Drawing model on frame! X = " + str(event.x) + ", Y = " + str(event.y))
+                    # print("Self = " + str(self))
+                    # print("Drawing model on frame! X = " + str(event.x) + ", Y = " + str(event.y))
                     self.modelCenters[self.currentMeanModel] = [event.x, event.y]
                     self.radioImages[self.currentRadiograph] =\
                         self.frameFactory.drawToothModelOnFrame(self,

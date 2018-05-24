@@ -13,10 +13,10 @@ class Tooth():
     def scale(self, scale):
         self.landmarks *= scale
         self.calculateCenter()
-
+        
     def rotate(self, theta):
         c, s = np.cos(theta), np.sin(theta)
-        R = np.array(((c, s), (-s, c)))
+        R = np.array(((c, -s), (s, c)))
         temp = self.landmarks.transpose()
         temp = np.dot(R, temp)
         self.landmarks = temp.transpose()

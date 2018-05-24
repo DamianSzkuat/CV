@@ -56,8 +56,9 @@ class FrameFactory:
         
         return teethImages
 
-    def createRadiographFrames(self, parent, drawLandmarks=False):
+    def createRadiographFrames(self, parent, meanModels=None, drawLandmarks=False):
         radioImages = list()
+        i = 0
         for radiograph in self.dataHandler.getRadiographs(deepCopy=True):
             img = radiograph.getImage()
 
@@ -67,7 +68,13 @@ class FrameFactory:
                 for tooth in teeth:
                    img = self._drawToothOnImage(tooth, img)
 
+            if meanModels is not None:
+                img = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
+                for model in meanModels[i]:
+                    img = self._drawToothOnImage(model, img)
+
             radioImages.append(RadiographFrame(parent, img))
+            i += 1
 
         return radioImages
 
@@ -78,9 +85,7 @@ class FrameFactory:
         for i in range(model_index+1):
             model = deepcopy(meanModels[i][0])
             model = Tooth(model)
-            print("Old model center: " + str(model.getCenter()))
             model.translate(modelLocations[i])
-            print("New model center: " + str(model.getCenter()))
             img = self._drawToothOnImage(model, img)
 
         return RadiographFrame(parent, img)
@@ -94,12 +99,12 @@ class FrameFactory:
         
         return img
 
-    def _drawToothOnImage(self, tooth, img):
+    def _drawToothOnImage(self, tooth, img, landmarkColor=(0,255,0), lineColor=(255,0,0), centerColor=(0,0,255)):
         for i in range(40):
             # Draw Circles
             x = int(tooth.getLandmarks()[i][0])
             y = int(tooth.getLandmarks()[i][1])
-            cv2.circle(img, (x, y), 1, (0,255,0), 1)
+            cv2.circle(img, (x, y), 1, landmarkColor, 1)
 
             # Draw line connecting the circles
             if i < 39:
@@ -109,10 +114,10 @@ class FrameFactory:
                 x_2 = int(tooth.getLandmarks()[0][0])
                 y_2 = int(tooth.getLandmarks()[0][1])
             
-            cv2.line(img, (x ,y), (x_2, y_2), (255,0,0))
+            cv2.line(img, (x ,y), (x_2, y_2), lineColor)
 
         # Draw center
         center = tooth.getCenter()
-        cv2.circle(img, (int(center[0]), int(center[1])), 5, (0,0,255), 2)
+        cv2.circle(img, (int(center[0]), int(center[1])), 5, centerColor, 2)
         return img
 

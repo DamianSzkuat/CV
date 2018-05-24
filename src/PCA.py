@@ -27,22 +27,47 @@ class PCA:
         importantEigenvalues, importantEigenvectors = self.getKLangestEigenvalues(eigenvalues, eigenvectors, totalVariance)
 
         print("Nb of important eigevalues: " + str(len(importantEigenvalues)))
+        print("Shape of important eigenvectors: " + str(importantEigenvectors.shape))
 
         return [mean, importantEigenvalues, importantEigenvectors]
 
     def pca(self, X, number_of_components):
-        # mean
+        [n,d] = X.shape
+        
         mean = np.mean(X, axis=0)
 
         X -= mean
 
-        # SVD
-        _, S, V = np.linalg.svd(X, full_matrices=True)
+        if n > d:
+            C = np.dot(X.T, X) / (X.shape[0] - 1)
+            [eigenvalues, eigenvectors] = np.linalg.eigh(C)
+        else:
+            C = np.dot(X, X.T) / (X.shape[1] - 1)
+            [eigenvalues, eigenvectors] = np.linalg.eigh(C)
+            eigenvectors = np.dot(X.T, eigenvectors)
+            for i in range(n):
+                eigenvectors[:, i] = eigenvectors[:, i] / np.linalg.norm(eigenvectors[:, i])
 
-        eigenvalues = S[0:number_of_components]
-        eigenvectors = V[:, 0:number_of_components]
+        idx = np.argsort(-eigenvalues)
+        eigenvalues = eigenvalues[idx]
+        eigenvectors = eigenvectors[:, idx]
+
+        eigenvalues = eigenvalues[0:number_of_components].copy()
+        eigenvectors = eigenvectors[:, 0:number_of_components].copy()
 
         return [mean, eigenvalues, eigenvectors]
+
+    def project(self, vector, eigenvectors, mean=None):
+        if mean is None:
+            return np.dot(vector, eigenvectors)
+
+        projection = np.dot(vector-mean, eigenvectors)
+        return projection
+
+    def reconstruct(self, param, eigenvectors, mean=None):
+        if mean is None:
+            return np.dot(param, eigenvectors.T)
+        return np.dot(param, eigenvectors.T) + mean
 
     def get_image_from_vector(self, vector, shape):
         M = vector
@@ -56,13 +81,13 @@ class PCA:
 
     def getKLangestEigenvalues(self, eigenvalues, eigenvectors, totalVariance):
         importantEigenvalues = [eigenvalues[0]]
-        importantEigenvectors = [eigenvectors[0]]
 
         i = 0
-        while np.sum(importantEigenvalues)/totalVariance < 0.90:
+        while np.sum(importantEigenvalues)/totalVariance < 0.99:
             i += 1
             importantEigenvalues.append(eigenvalues[i])
-            importantEigenvectors.append(eigenvectors[i])
+
+        importantEigenvectors = eigenvectors[:,:i+1]
 
         return importantEigenvalues, importantEigenvectors
         
