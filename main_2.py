@@ -16,6 +16,7 @@ from src.frameFactory import FrameFactory
 from src.PCA import PCA
 from src.tooth import Tooth
 from src.modelFitter import ModelFitter
+from src.statisticalModelTrainer import StatisticalModelTrainer
 
 
 class MainApp(tk.Tk):
@@ -24,9 +25,9 @@ class MainApp(tk.Tk):
         tk.Tk.__init__(self)
         self.title("CV Project")
 
-        self.dataHandler = DataHandler(leave_one_out=1)
-
+        self.dataHandler = DataHandler()
         self.frameFactory = FrameFactory(self.dataHandler)
+        self.statisticalModelTrainer = StatisticalModelTrainer()
 
         self.radiographFrameContainer = RadiographFrameContainer(self, self.frameFactory)
         self.procrustesTeethSetImageContainer = None
@@ -39,29 +40,9 @@ class MainApp(tk.Tk):
 
         self.alignedTeeth = list()
         self.meanModels = list()
-
-    def performInitialProcrustes(self):
-        self.procrustes = Procrustes()
-        
-        self.alignedTeeth = list()
-        for i in range(8):
-            temp = self.dataHandler.getAllTeethAtIndex(i, deepCopy=True)
-            self.alignedTeeth.append(self.procrustes.performProcrustesAlignment(temp))
-        self.showProcrustesTeethAtIndex(0)
     
-    def showProcrustesTeethAtIndex(self, idx):
-        self.procrustesTeethImageContainer = ProcrustesTeethImageContainer(self, self.frameFactory, self.alignedTeeth[idx])
-        self.buttonContainer.createImageNavigationButtons(self.procrustesTeethImageContainer)
-
-    def perfromPCA(self):
-        self.pca = PCA()
-
-        self.meanModels = list()
-        for i in range(8):
-            self.meanModels.append(self.pca.do_pca_and_build_model(self.alignedTeeth[i]))
-
-        self.meanModelContainer = MeanModelContainer(self, self.frameFactory, self.meanModels)
-        self.buttonContainer.createImageNavigationButtons(self.meanModelContainer)
+    def trainCompleteStatisticalModel(self):
+        self.statisticalModel = self.statisticalModelTrainer.trainCompleteStatisticalModel()
 
     def performManualModelPositionInit(self):
         #TODO Model Fitting

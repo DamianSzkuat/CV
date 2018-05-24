@@ -23,15 +23,15 @@ class ButtonContainer(tk.Frame):
         self.prev_button.grid(row=1, column=1, sticky="ew", pady=(0,20), padx=(20,0))
 
     def createFunctionButtons(self, controller):
-        self.procrustes_button = tk.Button(self,
-                                           text="Perform initial procrustes analysis",
-                                           command=lambda: controller.performInitialProcrustes())
-        self.procrustes_button.grid(row=3, column=1, sticky="ew", padx=(20,0))
+        self.train_statistical_model_button = tk.Button(self,
+                                                        text="Train complete statistical model",
+                                                        command=lambda: controller.trainCompleteStatisticalModel())
+        self.train_statistical_model_button.grid(row=3, column=1, sticky="ew", padx=(20,0))
     
-        self.PCA_button = tk.Button(self,
-                                    text="Perform PCA",
-                                    command=lambda: controller.perfromPCA())
-        self.PCA_button.grid(row=4, column=1, sticky="ew",padx=(20,0))
+        # self.PCA_button = tk.Button(self,
+        #                             text="Perform PCA",
+        #                             command=lambda: controller.perfromPCA())
+        # self.PCA_button.grid(row=4, column=1, sticky="ew",padx=(20,0))
 
         self.Model_manual_pos_init_button = tk.Button(self,
                                                       text="Manual position initialization",

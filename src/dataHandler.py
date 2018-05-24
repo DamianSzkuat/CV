@@ -18,6 +18,9 @@ class DataHandler:
 
             self.radiographs.append(radiograph)
 
+    def getLeftOutRadiograph(self, deepCopy=False):
+        return deepcopy(self.left_out_radiograph) if deepcopy else self.radiographs
+
     def getAllTeethSets(self, deepCopy=False):
         teethSets = list()
         for radiograph in self.radiographs:

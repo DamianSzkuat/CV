@@ -11,14 +11,9 @@ class ModelFitter:
         
         self.procrustes = Procrustes()
         self.pca = PCA()
-        eigenvalues = np.array(model[1])
-        eigenvectors = np.array(model[2])
+        eigenvectors = model.getEigenvectors()
         Y = target_tooth
-        mean = model[0]
-
-        #print("Mean = " + str(mean.getLandmarks().shape))
-        #print("eigenvalues = " + str(eigenvalues.shape))
-        #print("eigenvectors = " + str(eigenvectors.shape))
+        mean = Tooth(model.getMeanModel())
 
         # Init 
         b = 0
@@ -29,8 +24,6 @@ class ModelFitter:
             i += 1
 
             X, b_new = self.step(Y, X, eigenvectors, mean)
-
-            print(" i = " + str(i) + ", b_new = " + str(b_new))
 
             if np.allclose(b, b_new):
                 break

@@ -56,6 +56,28 @@ class FrameFactory:
         
         return teethImages
 
+    def createLefOutRadiographFrame(self, parent, meanModels=None, drawLandmarks=False):
+        radioImages = list()
+        i = 0
+
+        radiograph = self.dataHandler.getLeftOutRadiograph(deepCopy=True)
+        img = radiograph.getImage()
+
+        if drawLandmarks:
+            img = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
+            teeth = radiograph.getTeeth()
+            for tooth in teeth:
+                img = self._drawToothOnImage(tooth, img)
+
+        if meanModels is not None:
+            img = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
+            for model in meanModels[i]:
+                img = self._drawToothOnImage(model, img)
+
+        radioImages.append(RadiographFrame(parent, img))
+
+        return radioImages
+
     def createRadiographFrames(self, parent, meanModels=None, drawLandmarks=False):
         radioImages = list()
         i = 0

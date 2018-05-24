@@ -4,11 +4,12 @@ import numpy as np
 class PCA:
 
     def do_pca_and_build_model(self, teeth):
+        """
+        Performs pca on the provided examples and return a statistical model.
+        """
         N = len(teeth)
         P = teeth[0].getLandmarks().shape[0]*teeth[0].getLandmarks().shape[1]
-
         X = np.zeros((N, P))
-
         for i in range(len(teeth)):
 
             data = teeth[i].getLandmarks()
@@ -17,21 +18,15 @@ class PCA:
                 X[i][j] = v[j]
 
         mean, eigenvalues, eigenvectors = self.pca(X, number_of_components=N)
-
         mean = self.get_image_from_vector(mean, teeth[0].getLandmarks().shape)
-
         totalVariance = self.getTotalVariance(eigenvalues)
-
-        print("Nb of eigevalues: " + str(len(eigenvalues)))
-
         importantEigenvalues, importantEigenvectors = self.getKLangestEigenvalues(eigenvalues, eigenvectors, totalVariance)
-
-        print("Nb of important eigevalues: " + str(len(importantEigenvalues)))
-        print("Shape of important eigenvectors: " + str(importantEigenvectors.shape))
-
         return [mean, importantEigenvalues, importantEigenvectors]
 
     def pca(self, X, number_of_components):
+        """
+        Performs principal components analysis
+        """
         [n,d] = X.shape
         
         mean = np.mean(X, axis=0)
@@ -71,9 +66,7 @@ class PCA:
 
     def get_image_from_vector(self, vector, shape):
         M = vector
-
         img = np.reshape(M, shape, order='A')
-
         return img
 
     def getTotalVariance(self, eigenvalues):
