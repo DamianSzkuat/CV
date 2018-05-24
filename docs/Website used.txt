@@ -1,0 +1,2 @@
+https://en.wikipedia.org/wiki/Median_filter
+https://en.wikipedia.org/wiki/Bilateral_filter
