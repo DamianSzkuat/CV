@@ -1,6 +1,6 @@
 import numpy as np
 from copy import deepcopy
-
+import math
 
 from src.dataHandler import DataHandler
 from src.procrustes import Procrustes
@@ -8,6 +8,7 @@ from src.PCA import PCA
 from src.modelFitter import ModelFitter
 from src.filter import Filter
 from src.utils import Utils
+from src.multiResolutionTrainer import MultiResolutionTrainer
 
 from src.statisticalToothModel import StatisticalToothModel
 from src.completeStatisticalModel import CompleteStatisticalModel
@@ -20,24 +21,24 @@ class StatisticalModelTrainer:
         self.procrustes = Procrustes()
         self.pca = PCA()
         self.modelFitter = ModelFitter()
+        self.multiResTrainer = MultiResolutionTrainer()
 
-    def trainCompleteStatisticalModel(self, doLeaveOneOutTrainingSetTest=False):
+    def trainCompleteStatisticalModel(self, k_pixels, resolutionLevels, filter_settings, doLeaveOneOutTrainingSetTest=False):
         """
         Performs leave-one-out validation of the training set, then 
         trains a statistical model from the entire training set.
         """
         if doLeaveOneOutTrainingSetTest:
             self.doLeaveOneOutTrainingSetValidation()
-        statisticalModel = self.trainModelFromCompleteTrainingSet()
+        statisticalToothModels = self.trainModelFromCompleteTrainingSet()
+
+        grayLevelMultiResModel = self.multiResTrainer.trainGrayLevelMultiResolutionModel(k_pixels, resolutionLevels, filter_settings)
+
+        completeModel = CompleteStatisticalModel(statisticalToothModels, grayLevelMultiResModel)
+
         print("Statistical model trained!")
 
-        #TEST
-        radiograph = self.completeDataHandler.getRadiographs()[0]
-        k = 2
-        g_ex = self.calculateGrayLevelModelForAllPointsOneExample(radiograph, k)
-        print("g_ex.shape = " + str(g_ex.shape))
-
-        return statisticalModel
+        return completeModel
     
     def trainModel(self, dataHandler):
         """
@@ -66,66 +67,7 @@ class StatisticalModelTrainer:
             statisticalToothModel = StatisticalToothModel(mean, eigenvalues, eigenvectors)
             meanModels.append(statisticalToothModel)
         meanModels = np.array(meanModels)
-        completeStatisticalModel = CompleteStatisticalModel(meanModels)
-        return completeStatisticalModel
-    
-    def calculateGrayLevelModelForAllPointsOneExample(self, radiograph, k):
-        g_ex = list()
-
-        teeth = radiograph.getTeeth()
-        for tooth in teeth:
-            points = tooth.getLandmarks()
-            g_p = list()
-            for i in range(len(points)):
-                current_point = points[i]
-                
-                if i == 0:
-                    previous_point = points[len(points)-1]
-                else:
-                    previous_point = points[i-1]
-                
-                if i == len(points)-1:
-                    next_point = points[0]
-                else: 
-                    next_point = points[i+1]
-                
-                g_p.append(self.calculateGrayLevelModelForOnePointOneExample(radiograph, current_point, previous_point, next_point, k))
-            g_ex.append(np.array(g_p))
-        
-        return np.array(g_ex)
-
-    def calculateGrayLevelModelForOnePointOneExample(self, radiograph, current_point, previous_point, next_point, k):
-        """
-        calculates the grey-level vector of the pixels on the normal in the given point in the given example.
-        """
-
-        derivate_img = Filter.process_image(radiograph.getImage(deepCopy=True))
-        img = radiograph.getImage(deepCopy=True)
-
-        [x_1, y_1] = Utils.getPointOnNormal(current_point, previous_point, next_point, k)
-        [x_2, y_2] = Utils.getPointOnNormal(current_point, previous_point, next_point, -k)
-
-        originalPixels = Utils.createLineIterator([np.float32(x_1), np.float32(y_1)], [np.float32(x_2), np.float32(y_2)], img)
-        derivatePixels = Utils.createLineIterator([np.float32(x_1), np.float32(y_1)], [np.float32(x_2), np.float32(y_2)], derivate_img)
-
-        print("Point: " + str(current_point))
-        print("Original pixels: " + str(originalPixels))
-        # print("derivative pixels: " + str(derivatePixels))
-
-        if len(originalPixels) > 2*k + 1:
-            i = Utils.getIndexOfClosestPixelInArray(current_point, originalPixels)
-            print("Returned index = " + str(i))
-            originalPixels = originalPixels[i-k:i+k+1][:]
-            
-        if len(derivatePixels) > 2*k + 1:
-            i = Utils.getIndexOfClosestPixelInArray(current_point, originalPixels)
-            originalPixels = originalPixels[i-k:i+k+1][:]
-
-        # TODO what if not enough pixels taken!!
-
-        g = derivatePixels / np.sum(originalPixels)
-
-        return g
+        return meanModels
 
     def trainModelFromCompleteTrainingSet(self):
         """

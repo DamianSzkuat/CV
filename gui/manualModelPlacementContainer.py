@@ -1,10 +1,12 @@
 import tkinter as tk
 import numpy as np
 
+from src.tooth import Tooth
+
 
 class ManualModelPlacementContainer(tk.Frame):
 
-    def __init__(self, parent, frameFactory, meanModels):
+    def __init__(self, parent, frameFactory, toothModels):
         tk.Frame.__init__(self, parent)
         #self.pack(side="left", fill="both", expand=True)
         self.grid(row=0, column=0, sticky="nsew")
@@ -12,7 +14,12 @@ class ManualModelPlacementContainer(tk.Frame):
         self.grid_columnconfigure(0, weight=1)
 
         self.frameFactory = frameFactory
-        self.meanModels = meanModels
+
+        self.meanModels = list()
+        for model in toothModels:
+            self.meanModels.append(model.getMeanModel(deepCopy=True))
+        self.meanModels = np.array(self.meanModels)
+
         self.currentMeanModel = 0
         self.modelCenters = np.zeros((8,2))
         self.currentRadiograph = 0
@@ -32,15 +39,21 @@ class ManualModelPlacementContainer(tk.Frame):
                 if event.widget == child_2:
                     
                     # print("Self = " + str(self))
-                    # print("Drawing model on frame! X = " + str(event.x) + ", Y = " + str(event.y))
+                    print("Drawing model on frame! X = " + str(event.x) + ", Y = " + str(event.y))
                     self.modelCenters[self.currentMeanModel] = [event.x, event.y]
                     self.radioImages[self.currentRadiograph] =\
                         self.frameFactory.drawToothModelOnFrame(self,
                                                                 self.currentRadiograph,
                                                                 self.meanModels,
                                                                 self.currentMeanModel,
-                                                                self.modelCenters)
+                                                                self.modelCenters)[0]
                     self.show()
+
+    def getChosenRadiograph(self):
+        return self.currentRadiograph
+
+    def getChosenModelPositions(self):
+        return self.modelCenters
 
     def bindFrames(self, parent):
         for frame in self.radioImages:

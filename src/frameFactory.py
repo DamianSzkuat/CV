@@ -100,17 +100,40 @@ class FrameFactory:
 
         return radioImages
 
+    def createRadiographFramesFromRadiographs(self, radiographs, parent, meanModels=None, drawLandmarks=False):
+        radioImages = list()
+        i = 0
+        for radiograph in radiographs:
+            img = radiograph.getImage()
+
+            if drawLandmarks:
+                img = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
+                teeth = radiograph.getTeeth()
+                for tooth in teeth:
+                   img = self._drawToothOnImage(tooth, img)
+
+            if meanModels is not None:
+                img = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
+                for model in meanModels[i]:
+                    img = self._drawToothOnImage(model, img)
+
+            radioImages.append(RadiographFrame(parent, img))
+            i += 1
+
+        return radioImages
+
     def drawToothModelOnFrame(self, parent, radiograph_index, meanModels, model_index, modelLocations):
         img = self.dataHandler.getRadiographs(deepCopy=True)[radiograph_index].getImage()
         img = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
 
         for i in range(model_index+1):
-            model = deepcopy(meanModels[i][0])
+            model = deepcopy(meanModels[i])
             model = Tooth(model)
+            model.scale(200)
             model.translate(modelLocations[i])
             img = self._drawToothOnImage(model, img)
 
-        return RadiographFrame(parent, img)
+        return RadiographFrame(parent, img), 
 
     def _drawTootSethOnImage(self, teethSet, img):
         for i in range(8):

@@ -1,4 +1,5 @@
 import numpy as np
+import math 
 
 
 class Utils:
@@ -30,8 +31,8 @@ class Utils:
         #used to calculate slope and relative location between points
         dX = P2X - P1X
         dY = P2Y - P1Y
-        dXa = np.abs(dX)
-        dYa = np.abs(dY)
+        dXa = Utils.ceiling(np.abs(dX))
+        dYa = Utils.ceiling(np.abs(dY))
 
         #predefine numpy array for output based on distance between points
         itbuffer = np.empty(shape=(np.maximum(Utils.ceiling(dYa),Utils.ceiling(dXa)),3),dtype=np.float32)
@@ -103,16 +104,85 @@ class Utils:
 
     @staticmethod
     def getPointOnNormal(current_point, previous_point, next_point, dx):
-        (x_1, y_1) = previous_point
-        (x_2, y_2) = next_point
-        (x_3, y_3) = current_point
+        (x_a, y_a) = previous_point
+        (x_b, y_b) = next_point
+        (x_c, y_c) = current_point
 
-        r = (y_2 - y_1)/(x_2 - x_1)
-        b = y_3 + (1/r)*x_3
-
-        x = x_3 + dx
-        y = (-1/r)*x + b 
+        if math.isclose(x_a, x_b):
+            [x, y] = [x_c, y_c + dx]
+            [x, y] = [x_c, y_c - dx]
+        elif math.isclose(y_a, y_b) :
+            [x, y] = [x_c + dx, y_c]
+            [x, y] = [x_c - dx, y_c]
+        else:    
+            r = (y_b - y_a)/(x_b - x_a)
+            b = y_c + (1/r)*x_c
+            x = x_c + dx
+            y = (-1/r)*x + b 
 
         return [x, y]
+    
+    @staticmethod
+    def getSampleFromImage(img, derivate_img, current_point, previous_point, next_point, k):
+        """
+        Returns a sample of 2*k+1 pixels on the normal to the model in the given point.
+        """
 
-         
+        # print("img: " + str(img.shape))
+        # print("derivate_img: " + str(derivate_img.shape))
+        # print("Current point: " + str(current_point))
+        # print("Previous point: " + str(previous_point))
+        # print("Next point: " + str(next_point))
+
+        # Get two points on the normal to the model at the given point
+        i = 1
+        while True:
+            [x_1, y_1] = Utils.getPointOnNormal(current_point, previous_point, next_point, (k+1)/i)
+            [x_2, y_2] = Utils.getPointOnNormal(current_point, previous_point, next_point, -(k+1)/i)
+
+            # print("Points on the normal: " + str([x_1, y_1]) + ", " + str([x_2, y_2]))
+
+            # Get the pixels on the normal between the two given points from both images
+            originalPixels = Utils.createLineIterator([np.float32(x_1), np.float32(y_1)], [np.float32(x_2), np.float32(y_2)], img)
+            derivatePixels = Utils.createLineIterator([np.float32(x_1), np.float32(y_1)], [np.float32(x_2), np.float32(y_2)], derivate_img)
+
+            # print("originalPixels.shape: " + str(originalPixels.shape))
+
+            if originalPixels.shape[0] > 2*k: # and x_1 > 0 and y_1 > 0 and x_2 > 0 and y_2 > 0:
+                break
+            if i > 10:
+                break
+            i += 1
+            break
+        
+        # Remove unnecessary pixels
+        if len(originalPixels) > 2*k + 1:
+            i = Utils.getIndexOfClosestPixelInArray(current_point, originalPixels)
+            originalPixels = originalPixels[i-k:i+k+1][:]
+            
+        if len(derivatePixels) > 2*k + 1:
+            i = Utils.getIndexOfClosestPixelInArray(current_point, derivatePixels)
+            derivatePixels = derivatePixels[i-k:i+k+1][:]
+
+        # Take only the gray values from the arrays
+        originalPixelsValues = originalPixels[:,2:].flatten()
+        derivatePixelsValues = derivatePixels[:,2:].flatten()
+
+        # Divide the vector of derivate gray values by the sum of the values of the 
+        # pixels from the original image.
+        return derivatePixelsValues / np.sum(originalPixelsValues), originalPixels, derivatePixels
+
+class Rectangle:
+    top = None
+    bottom = None
+    left = None
+    right = None
+
+    def __init__(self, left, top, right, bottom):
+        self.top = top
+        self.bottom = bottom
+        self.left = left
+        self.right = right
+
+    def left_top(self):
+        return np.array((self.left, self.top))

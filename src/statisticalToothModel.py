@@ -8,6 +8,9 @@ class StatisticalToothModel:
         self.eigenvectors = eigenvectors
 
     def getMeanModel(self, deepCopy=False):
+        """
+        Return a 2d matrix representing the mean model of the tooth
+        """
         return deepcopy(self.meanModel) if deepCopy else self.meanModel
 
     def getEigenvalues(self, deepCopy=False):

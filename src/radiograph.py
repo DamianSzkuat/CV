@@ -28,8 +28,6 @@ class Radiograph:
                                              'landmarks%d-%d.txt'
                                              % (radiographID + 1, i + 1))
                 self.teeth.append(Tooth(landmark))
-        
-        self.scaleImage(0.4)
         self.teethSet = TeethSet(self.teeth)
 
     def loadLandmark(self, path):
@@ -46,9 +44,11 @@ class Radiograph:
         height = self.image.shape[0]
         width = self.image.shape[1]
         self.image = cv2.resize(self.image, (int(width*scale), int(height*scale)))
-        
         for tooth in self.teeth:
             tooth.scale(scale)
+    
+    def downScale(self):
+        self.scaleImage(0.5)
 
     def getTeethSet(self, deepCopy=False):
         return deepcopy(self.teethSet) if deepCopy else self.teethSet

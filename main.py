@@ -9,13 +9,18 @@ from gui.buttonContainer import ButtonContainer
 from gui.meanModelContainer import MeanModelContainer
 from gui.manualModelPlacementContainer import ManualModelPlacementContainer
 from gui.autoModelPlacementContainer import AutoModelPlacementContainer
-from gui.leaveOneOutModelFittingContainer import LeaveOneOutModelFittingContainer
+from gui.modelFittingContainer import ModelFittingContainer
+
 from src.dataHandler import DataHandler
 from src.procrustes import Procrustes
 from src.frameFactory import FrameFactory
 from src.PCA import PCA
 from src.tooth import Tooth
 from src.modelFitter import ModelFitter
+from src.statisticalModelTrainer import StatisticalModelTrainer
+from src.MultiResActiveShapeModel import MultiResolutionActiveShapeModel
+
+from src.filter import Filter
 
 
 class MainApp(tk.Tk):
@@ -24,9 +29,10 @@ class MainApp(tk.Tk):
         tk.Tk.__init__(self)
         self.title("CV Project")
 
-        self.dataHandler = DataHandler(leave_one_out=1)
-
+        self.dataHandler = DataHandler(scale_radiographs_by=0.4)
         self.frameFactory = FrameFactory(self.dataHandler)
+        self.statisticalModelTrainer = StatisticalModelTrainer()
+        self.procrustes = Procrustes()
 
         self.radiographFrameContainer = RadiographFrameContainer(self, self.frameFactory)
         self.procrustesTeethSetImageContainer = None
@@ -35,88 +41,91 @@ class MainApp(tk.Tk):
         self.buttonContainer = ButtonContainer(self)
         self.buttonContainer.createImageNavigationButtons(self.radiographFrameContainer)
         self.buttonContainer.createFunctionButtons(self)
-        self.buttonContainer.createTeethSwapButtons(self)
+
+        self.manualModelPlacementContainer = None
 
         self.alignedTeeth = list()
         self.meanModels = list()
+        self.k_pixels = [8,5,3,2,1]
+        self.m_pixels = [20,10,5,3,2]
+        self.resolutionLevels = 2
+        self.filter_settings = [(3, 3, 6), (3, 3, 6), (1, 3, 6), (1, 2, 6), (1, 2, 3)]
 
-    def performInitialProcrustes(self):
-        self.procrustes = Procrustes()
-        
-        self.alignedTeeth = list()
-        for i in range(8):
-            temp = self.dataHandler.getAllTeethAtIndex(i, deepCopy=True)
-            self.alignedTeeth.append(self.procrustes.performProcrustesAlignment(temp))
-        self.showProcrustesTeethAtIndex(0)
-    
-    def showProcrustesTeethAtIndex(self, idx):
-        self.procrustesTeethImageContainer = ProcrustesTeethImageContainer(self, self.frameFactory, self.alignedTeeth[idx])
-        self.buttonContainer.createImageNavigationButtons(self.procrustesTeethImageContainer)
+        # self.filterTest()
 
-    def perfromPCA(self):
-        self.pca = PCA()
+    def filterTest(self):
+        radiograph = self.dataHandler.getRadiographs(deepCopy=True)[0]
+        blurred_img = Filter.process_image(deepcopy(radiograph.getImage()), median_kernel=3, bilateral_kernel=10)
+        img_1 = cv2.Canny(deepcopy(blurred_img), 15, 15)
+        cv2.imshow("Img1", img_1)
 
-        self.meanModels = list()
-        for i in range(8):
-            self.meanModels.append(self.pca.do_pca_and_build_model(self.alignedTeeth[i]))
+        radiograph.downScale()
+        blurred_img = Filter.process_image(deepcopy(radiograph.getImage()), median_kernel=3, bilateral_kernel=10)
+        img_2 = cv2.Canny(deepcopy(blurred_img), 15, 15)
+        cv2.imshow("Img2", img_2)
 
-        self.meanModelContainer = MeanModelContainer(self, self.frameFactory, self.meanModels)
-        self.buttonContainer.createImageNavigationButtons(self.meanModelContainer)
+        radiograph.downScale()
+        blurred_img = Filter.process_image(deepcopy(radiograph.getImage()), median_kernel=3, bilateral_kernel=10)
+        img_3 = cv2.Canny(deepcopy(blurred_img), 15, 15)
+        cv2.imshow("Img3", img_3)
+
+        radiograph.downScale()
+        blurred_img = Filter.process_image(deepcopy(radiograph.getImage()), median_kernel=3, bilateral_kernel=10)
+        img_4 = cv2.Canny(deepcopy(blurred_img), 15, 15)
+        cv2.imshow("Img4", img_4)
+
+        radiograph.downScale()
+        blurred_img = Filter.process_image(deepcopy(radiograph.getImage()), median_kernel=3, bilateral_kernel=10)
+        img_5 = cv2.Canny(deepcopy(blurred_img), 15, 15)
+        cv2.imshow("Img5", img_5)
+
+
+    def trainCompleteStatisticalModel(self):
+        self.statisticalModel = self.statisticalModelTrainer.trainCompleteStatisticalModel(self.k_pixels, self.resolutionLevels, self.filter_settings)
 
     def performManualModelPositionInit(self):
         #TODO Model Fitting
-        self.manualModelPlacementContainer = ManualModelPlacementContainer(self, self.frameFactory, self.meanModels)
+        self.manualModelPlacementContainer = ManualModelPlacementContainer(self, self.frameFactory, self.statisticalModel.getAllToothModels(deepCopy=True))
         self.buttonContainer.createImageNavigationButtons(self.manualModelPlacementContainer)
     
     def acceptModelPosition(self):
         self.manualModelPlacementContainer.nextMeanModel()
 
     def performAutoModelPositionInit(self):
-        self.procrustes = Procrustes()
-        radiographs = self.dataHandler.getRadiographs(deepCopy=True)
-        self.initializedMeanModels = list()
-
-        for radiograph in radiographs:
-            teeth = radiograph.getTeeth(deepCopy=True)
-            modelset = list()
-            for i in range(8):
-                tooth = teeth[i]
-                model = deepcopy(self.meanModels[i][0])
-                model = Tooth(model)
-                temp = self.procrustes.allignModelToData(tooth, model)[1]
-                modelset.append(temp)
-            self.initializedMeanModels.append(modelset)
-
-        print("InitializedMeanModel = " + str(np.array(self.initializedMeanModels).shape))
-        self.autoModelPlacementContainer = AutoModelPlacementContainer(self, self.frameFactory, self.initializedMeanModels)
-        self.buttonContainer.createImageNavigationButtons(self.autoModelPlacementContainer)
+        return None
     
     def performModelFitting(self):
-        self.modelFitter = ModelFitter()
-        radiographs = [self.dataHandler.getLeftOutRadiograph(deepCopy=True)]
+        
+        if self.manualModelPlacementContainer is not None:
+            initialModelPositions = self.manualModelPlacementContainer.getChosenModelPositions()
+            initialModelPositions *= 2.5
+
+
+        self.multiResActiveShapeModel = MultiResolutionActiveShapeModel(self.statisticalModel,
+                                                                        resolutionLevels=self.resolutionLevels,
+                                                                        m_pixels=self.m_pixels,
+                                                                        k_pixels=self.k_pixels,
+                                                                        filter_settings=self.filter_settings,
+                                                                        initialPositions=initialModelPositions)
+        radiograph = DataHandler().getRadiographs(deepCopy=True)[self.manualModelPlacementContainer.getChosenRadiograph()]
+
+        # Fit the first tooth to the radiograph
+        fittedModels_Y = self.multiResActiveShapeModel.fitCompleteModel(radiograph)
 
         self.fittedModels = list()
-        for radiograph in radiographs:
-            teeth = radiograph.getTeeth(deepCopy=True)
-            modelset = list()
-            for i in range(8):
-                tooth = deepcopy(teeth[i])
-                model = deepcopy(self.meanModels[i][0])
-                model = Tooth(model)
-                full_model = [model, deepcopy(self.meanModels[i][1]), deepcopy(self.meanModels[i][2])]
 
-                # Fit the model to the radiograph
-                fitted_model = self.modelFitter.fitModel(deepcopy(tooth), full_model)
+        # allign fitted model to be drawn
+        for model in fittedModels_Y:
+            [X, Y] = model
+            temp = self.procrustes.allignModelToData(Y, X)[1]
+            self.fittedModels.append(temp)
 
-                # allign fitted model to be drawn
-                temp = self.procrustes.allignModelToData(deepcopy(tooth), fitted_model)[1]
-                modelset.append(temp)
-
-            self.fittedModels.append(modelset)
+        self.fittedModels = np.array(self.fittedModels)
         
         print("fittedModels" + str(np.array(self.fittedModels).shape))
-        self.leaveOneOutModelFittingContainer = LeaveOneOutModelFittingContainer(self, self.frameFactory,  self.fittedModels)
-        self.buttonContainer.createImageNavigationButtons(self.leaveOneOutModelFittingContainer)
+        radiograph.scaleImage(0.4)
+        self.modelFittingContainer = ModelFittingContainer(self, self.frameFactory,  [self.fittedModels], radiograph)
+        self.buttonContainer.createImageNavigationButtons(self.modelFittingContainer)
 
 
 if __name__ == '__main__':

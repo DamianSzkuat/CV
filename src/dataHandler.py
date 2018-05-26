@@ -4,13 +4,16 @@ from copy import deepcopy
 
 class DataHandler:
 
-    def __init__(self, leave_one_out=None):
+    def __init__(self, scale_radiographs_by=None, leave_one_out=None):
         self.radiographs = list()
         self.nb_radiographs = 14
 
         for i in range(self.nb_radiographs):
             radiograph = Radiograph()
             radiograph.loadRadiograph(i, True)
+
+            if scale_radiographs_by is not None:
+                radiograph.scaleImage(scale_radiographs_by)
 
             if leave_one_out is not None and i == leave_one_out:
                 self.left_out_radiograph = radiograph
