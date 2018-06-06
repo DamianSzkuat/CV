@@ -64,6 +64,10 @@ class StatisticalModelTrainer:
         meanModels = list()
         for i in range(8):
             [mean, eigenvalues, eigenvectors] = self.pca.do_pca_and_build_model(alignedTrainingExamples[i])
+
+            # Test 
+            self.pca.project()
+
             statisticalToothModel = StatisticalToothModel(mean, eigenvalues, eigenvectors)
             meanModels.append(statisticalToothModel)
         meanModels = np.array(meanModels)

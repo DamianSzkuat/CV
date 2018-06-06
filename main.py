@@ -46,12 +46,12 @@ class MainApp(tk.Tk):
 
         self.alignedTeeth = list()
         self.meanModels = list()
-        self.k_pixels = [5,2,2,2,1]
-        self.m_pixels = [10,4,3,3,2]
+        self.k_pixels = [13,7,3,2,1]
+        self.m_pixels = [25,15,6,3,2]
         self.resolutionLevels = 3
         self.filter_settings = [(3, 3, 6), (3, 3, 6), (1, 3, 6), (1, 2, 6), (1, 2, 3)]
 
-        self.filterTest()
+        #self.filterTest()
 
     def filterTest(self):
         radiograph = self.dataHandler.getRadiographs(deepCopy=True)[0]
@@ -82,8 +82,6 @@ class MainApp(tk.Tk):
         # blurred_img = Filter.process_image(deepcopy(radiograph.getImage()), median_kernel=3, bilateral_kernel=10)
         # img_5 = cv2.Canny(deepcopy(blurred_img), 15, 15)
         # cv2.imshow("Img5", img_5)
-
-
 
     def trainCompleteStatisticalModel(self):
         self.statisticalModel = self.statisticalModelTrainer.trainCompleteStatisticalModel(self.k_pixels, self.resolutionLevels, self.filter_settings)
