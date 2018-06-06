@@ -13,17 +13,23 @@ class Filter:
         
         img = cv2.medianBlur(img, median_kernel)
         img = cv2.bilateralFilter(img, bilateral_kernel, bilateral_color, 50)
+        # img = cv2.equalizeHist(img)
         return img
 
-    # @staticmethod
-    # def laplacian(img):
-    #     img = cv2.Laplacian(img, cv2.CV_64F)
-    #     return img
+    @staticmethod
+    def laplacian(img):
+        img = cv2.Laplacian(img, cv2.CV_64F)
+        return img
 
     @staticmethod
     def cannyEdge(img):
-        img = cv2.Canny(img, 15, 15)
+        img = cv2.Canny(img, 30, 30)
         return img
+
+    # @staticmethod
+    # def histogramEql(img):
+    #     img = cv2.equalizeHist(img)
+    #     return img
 
     @staticmethod
     def cropImageToRegionOfInterest(img, resolutionLevel):

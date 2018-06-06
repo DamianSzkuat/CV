@@ -46,38 +46,43 @@ class MainApp(tk.Tk):
 
         self.alignedTeeth = list()
         self.meanModels = list()
-        self.k_pixels = [8,5,3,2,1]
-        self.m_pixels = [20,10,5,3,2]
-        self.resolutionLevels = 2
+        self.k_pixels = [5,2,2,2,1]
+        self.m_pixels = [10,4,3,3,2]
+        self.resolutionLevels = 3
         self.filter_settings = [(3, 3, 6), (3, 3, 6), (1, 3, 6), (1, 2, 6), (1, 2, 3)]
 
-        # self.filterTest()
+        self.filterTest()
 
     def filterTest(self):
         radiograph = self.dataHandler.getRadiographs(deepCopy=True)[0]
         blurred_img = Filter.process_image(deepcopy(radiograph.getImage()), median_kernel=3, bilateral_kernel=10)
-        img_1 = cv2.Canny(deepcopy(blurred_img), 15, 15)
-        cv2.imshow("Img1", img_1)
+        # img_1 = cv2.Canny(deepcopy(blurred_img), 15, 15)
+        # cv2.imshow("Img1", img_1)
 
-        radiograph.downScale()
-        blurred_img = Filter.process_image(deepcopy(radiograph.getImage()), median_kernel=3, bilateral_kernel=10)
-        img_2 = cv2.Canny(deepcopy(blurred_img), 15, 15)
-        cv2.imshow("Img2", img_2)
+        #img_histo = Filter.histogramEql(blurred_img)
+        img_laplacian = Filter.laplacian(blurred_img)
+        cv2.imshow("Laplacian", img_laplacian)
 
-        radiograph.downScale()
-        blurred_img = Filter.process_image(deepcopy(radiograph.getImage()), median_kernel=3, bilateral_kernel=10)
-        img_3 = cv2.Canny(deepcopy(blurred_img), 15, 15)
-        cv2.imshow("Img3", img_3)
+        # radiograph.downScale()
+        # blurred_img = Filter.process_image(deepcopy(radiograph.getImage()), median_kernel=3, bilateral_kernel=10)
+        # img_2 = cv2.Canny(deepcopy(blurred_img), 15, 15)
+        # cv2.imshow("Img2", img_2)
 
-        radiograph.downScale()
-        blurred_img = Filter.process_image(deepcopy(radiograph.getImage()), median_kernel=3, bilateral_kernel=10)
-        img_4 = cv2.Canny(deepcopy(blurred_img), 15, 15)
-        cv2.imshow("Img4", img_4)
+        # radiograph.downScale()
+        # blurred_img = Filter.process_image(deepcopy(radiograph.getImage()), median_kernel=3, bilateral_kernel=10)
+        # img_3 = cv2.Canny(deepcopy(blurred_img), 15, 15)
+        # cv2.imshow("Img3", img_3)
 
-        radiograph.downScale()
-        blurred_img = Filter.process_image(deepcopy(radiograph.getImage()), median_kernel=3, bilateral_kernel=10)
-        img_5 = cv2.Canny(deepcopy(blurred_img), 15, 15)
-        cv2.imshow("Img5", img_5)
+        # radiograph.downScale()
+        # blurred_img = Filter.process_image(deepcopy(radiograph.getImage()), median_kernel=3, bilateral_kernel=10)
+        # img_4 = cv2.Canny(deepcopy(blurred_img), 15, 15)
+        # cv2.imshow("Img4", img_4)
+
+        # radiograph.downScale()
+        # blurred_img = Filter.process_image(deepcopy(radiograph.getImage()), median_kernel=3, bilateral_kernel=10)
+        # img_5 = cv2.Canny(deepcopy(blurred_img), 15, 15)
+        # cv2.imshow("Img5", img_5)
+
 
 
     def trainCompleteStatisticalModel(self):

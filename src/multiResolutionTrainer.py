@@ -75,9 +75,9 @@ class MultiResolutionTrainer:
                 radiograph.downScale()
 
             # Pre process image
-            img = radiograph.getImage(deepCopy=True)
-            # print("Size trained image: " + str(img.shape))
-            derivate_img = Filter.cannyEdge(Filter.process_image(deepcopy(img), filter_settings[0], filter_settings[1], filter_settings[2]))
+            img = Filter.process_image(deepcopy(radiograph.getImage(deepCopy=True)), filter_settings[0], filter_settings[1], filter_settings[2])
+            derivate_img = Filter.laplacian(img)
+            # derivate_img = Filter.histogramEql(Filter.process_image(deepcopy(img), filter_settings[0], filter_settings[1], filter_settings[2]))
             # derivate_img = Filter.process_image(deepcopy(derivate_img), median_kernel=3, bilateral_kernel=5)
             
             g_ex = self.trainGrayLevelModelForAllPointsOneExample(img, derivate_img, radiograph, k)

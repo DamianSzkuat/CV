@@ -99,11 +99,13 @@ class MultiResolutionActiveShapeModel:
 
     def _fitSingleToothModel(self, toothIndex, currentResolutionLevel, radiograph, X, Y, b, eigenvalues, eigenvectors, mean, filter_settings):
 
+        scale = 500/((2*currentResolutionLevel)+1)
+
         Y_copy = deepcopy(Y)
         i = 0
         while i < 20:
 
-            X, b_new = self._modelFittingStep(Y, X, eigenvalues, eigenvectors, mean)
+            X, b_new = self._modelFittingStep(Y, X, eigenvalues, eigenvectors, mean, scale)
             # print("X Step: " + str(X.getLandmarks()))
 
             # Calculate new Y from the current X
@@ -115,7 +117,7 @@ class MultiResolutionActiveShapeModel:
             Y = Tooth(Y)
             Y_copy = deepcopy(Y)
 
-            if (np.isclose(b, b_new).all() and i>3):
+            if ((np.isclose(b, b_new).all() and i>3) or (i>=(12/(currentResolutionLevel+1)))):
                 print("Breaking after " + str(i) + " iterations")
                 break
             else:
@@ -131,7 +133,7 @@ class MultiResolutionActiveShapeModel:
               
         return X, Y
 
-    def _modelFittingStep(self, Y, X, eigenvalues, eigenvectors, mean):
+    def _modelFittingStep(self, Y, X, eigenvalues, eigenvectors, mean, scale):
 
         # Fit Y to X
         Y_new = self.procrustes.allignDataToModel(Y,X)
@@ -142,8 +144,9 @@ class MultiResolutionActiveShapeModel:
 
         # Enforce constraint |b_i| < 3*lambda_i
         for i in range(len(b)):
-            if abs(b[i]) > 6*eigenvalues[i]:
-                b[i] = 6*eigenvalues[i]
+            if abs(b[i]) > 2*eigenvalues[i]*scale:
+                b[i] = 2*eigenvalues[i]*scale
+                # print("eigenvalue: " + str(eigenvalues[i]))
 
         # Generate new model points X 
         X_new = self.pca.reconstruct(b, eigenvectors, mean.getLandmarks().flatten())
@@ -154,8 +157,9 @@ class MultiResolutionActiveShapeModel:
 
     def _getNewYEstimateAtCurrentResolutionLevel(self, X, radiograph, currentTooth, currentResolutionLevel, filter_settings):
         # Pre process image
-        img = radiograph.getImage(deepCopy=True)
-        derivate_img = Filter.cannyEdge(Filter.process_image(deepcopy(img), filter_settings[0], filter_settings[1], filter_settings[2]))
+        img = Filter.process_image(deepcopy(radiograph.getImage(deepCopy=True)), filter_settings[0], filter_settings[1], filter_settings[2])
+        derivate_img = Filter.laplacian(img)
+        # derivate_img = Filter.histogramEql(Filter.process_image(deepcopy(img), filter_settings[0], filter_settings[1], filter_settings[2]))
         # derivate_img = Filter.process_image(deepcopy(derivate_img), median_kernel=3, bilateral_kernel=5)
         #cv2.imshow("Test", derivate_img)
         #cv2.waitKey(0)
