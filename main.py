@@ -52,6 +52,7 @@ class MainApp(tk.Tk):
         self.filter_settings = [(3, 3, 6), (3, 3, 6), (1, 3, 6), (1, 2, 6), (1, 2, 3)]
 
         #self.filterTest()
+        self.createMeanModelImages = True        
 
     def filterTest(self):
         radiograph = self.dataHandler.getRadiographs(deepCopy=True)[0]
@@ -85,6 +86,10 @@ class MainApp(tk.Tk):
 
     def trainCompleteStatisticalModel(self):
         self.statisticalModel = self.statisticalModelTrainer.trainCompleteStatisticalModel(self.k_pixels, self.resolutionLevels, self.filter_settings)
+
+        if(self.createMeanModelImages): 
+            self.frameFactory.createMeanModelPresentationImages(self.statisticalModel)
+
 
     def performManualModelPositionInit(self):
         #TODO Model Fitting

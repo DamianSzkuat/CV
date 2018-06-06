@@ -8,6 +8,8 @@ from gui.teethSetFrame import TeethSetFrame
 from gui.meanModelFrame import MeanModelFrame
 
 from src.tooth import Tooth
+from src.PCA import PCA
+
 
 
 class FrameFactory:
@@ -165,4 +167,67 @@ class FrameFactory:
         center = tooth.getCenter()
         cv2.circle(img, (int(center[0]), int(center[1])), 5, centerColor, 2)
         return img
+
+    def _drawToothContourOnImage(self, tooth, img, lineColor=(255,0,0)):
+        for i in range(40):
+            # Draw Circles
+            x = int(tooth.getLandmarks()[i][0])
+            y = int(tooth.getLandmarks()[i][1])
+            # cv2.circle(img, (x, y), 1, landmarkColor, 1)
+
+            # Draw line connecting the circles
+            if i < 39:
+                x_2 = int(tooth.getLandmarks()[i+1][0])
+                y_2 = int(tooth.getLandmarks()[i+1][1])
+            else: 
+                x_2 = int(tooth.getLandmarks()[0][0])
+                y_2 = int(tooth.getLandmarks()[0][1])
+            
+            cv2.line(img, (x ,y), (x_2, y_2), lineColor)
+        return img
+
+    def createMeanModelPresentationImages(self, statisticalModel):
+        toothModels = statisticalModel.getAllToothModels(deepCopy=True)
+
+        pca = PCA()
+
+        for i in range(8):
+            height = 360
+            width = 320
+            img = np.zeros((height,width,3), np.uint8)
+            meanModel = toothModels[i].getMeanModel(deepCopy=True)
+            flatModel = meanModel.flatten()
+            eigenvalues = toothModels[i].getEigenvalues(deepCopy=True)
+            eigenvectors = toothModels[i].getEigenvectors(deepCopy=True)
+
+            meanTooth = Tooth(deepcopy(meanModel))
+            meanTooth.scale(height)
+            meanTooth.translate([width/2, height/2])
+
+            for i in range(len(eigenvalues)):
+                
+                maxChangeVector = np.zeros(np.array(eigenvalues).shape)
+                maxChangeVector[i] = 500*eigenvalues[i]
+                maxChange = pca.reconstruct(maxChangeVector, eigenvectors, deepcopy(flatModel))
+                maxChange = maxChange.reshape((maxChange.shape[0] // 2, 2))
+                maxChangeTooth = Tooth(maxChange)
+                maxChangeTooth.scale(height)
+                maxChangeTooth.translate([width/2, height/2])
+
+                minChangeVector = np.zeros(np.array(eigenvalues).shape)
+                minChangeVector[i] = -500*(eigenvalues[i])
+                minChange = pca.reconstruct(minChangeVector, eigenvectors, deepcopy(flatModel))
+                minChange = minChange.reshape((minChange.shape[0] // 2, 2))
+                minChangeTooth = Tooth(minChange)
+                minChangeTooth.scale(height)
+                minChangeTooth.translate([width/2, height/2])
+
+                img = self._drawToothContourOnImage(meanTooth, img, lineColor=(255,255,255))
+                img = self._drawToothContourOnImage(maxChangeTooth, img, lineColor=(255,255,255))
+                img = self._drawToothContourOnImage(minChangeTooth, img, lineColor=(255,255,255))
+                cv2.imshow("Mean Model", img)
+
+
+
+
 
