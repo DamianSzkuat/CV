@@ -112,6 +112,7 @@ class MultiResolutionTrainer:
         
         return np.array(g_ex)
 
+
     def trainGrayLevelModelForOnePointOneExample(self, img, derivate_img, current_point, previous_point, next_point, k):
         """
         calculates the grey-level vector of the pixels on the normal in the given point in the given example.
