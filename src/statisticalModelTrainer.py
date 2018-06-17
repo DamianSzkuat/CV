@@ -83,7 +83,7 @@ class StatisticalModelTrainer:
     def doLeaveOneOutTrainingSetValidation(self):
         """
         Performs a leave-one-out validation of the training set. 
-        If for any subset of the training set the error on the leaft out example
+        If for any subset of the training set the error on the left out example
         is too big, the training set is considered insuficient.
         """
         # Number of training examples
@@ -92,6 +92,7 @@ class StatisticalModelTrainer:
         for i in range(n):
             dataHandler = DataHandler(leave_one_out=i)
             statisticalModel = self.trainModel(dataHandler)
+            print("Left out radiograph: " + str(i))
             self.testTrainedModelOnLeftOutExample(dataHandler, statisticalModel)
         
     def testTrainedModelOnLeftOutExample(self, dataHandler, statisticalModel):
@@ -127,7 +128,7 @@ class StatisticalModelTrainer:
         total_error = 0
         for i in range(8):
             tooth = deepcopy(teeth[i])
-            model = statisticalModel.getToothModelByIndex(i, deepCopy=True)
+            model = statisticalModel[i]
 
             # Fit the model to the radiograph
             fitted_model = self.modelFitter.fitModel(deepcopy(tooth), model)
