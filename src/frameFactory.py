@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 from copy import deepcopy
+import math
 
 from gui.radiographFrame import RadiographFrame
 from gui.singleToothFrame import SingleToothFrame
@@ -9,6 +10,7 @@ from gui.meanModelFrame import MeanModelFrame
 
 from src.tooth import Tooth
 from src.PCA import PCA
+from src.filter import Filter
 
 
 
@@ -124,13 +126,16 @@ class FrameFactory:
 
         return radioImages
 
-    def drawToothModelOnFrame(self, parent, radiograph_index, meanModels, model_index, modelLocations):
+    def drawToothModelOnFrame(self, parent, radiograph_index, meanModels, model_index, modelLocations, rotations):
         img = self.dataHandler.getRadiographs(deepCopy=True)[radiograph_index].getImage()
         img = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
 
         for i in range(model_index+1):
             model = deepcopy(meanModels[i])
             model = Tooth(model)
+            rotation = rotations[i]
+            theta = rotation*(math.pi/180)
+            model.rotate(theta)
             model.scale(200)
             model.translate(modelLocations[i])
             img = self._drawToothOnImage(model, img)
@@ -168,7 +173,7 @@ class FrameFactory:
         cv2.circle(img, (int(center[0]), int(center[1])), 5, centerColor, 2)
         return img
 
-    def _drawToothContourOnImage(self, tooth, img, lineColor=(255,0,0)):
+    def _drawToothContourOnImage(self, tooth, img, lineColor=(255,0,0), thickness = 3):
         for i in range(40):
             # Draw Circles
             x = int(tooth.getLandmarks()[i][0])
@@ -183,7 +188,7 @@ class FrameFactory:
                 x_2 = int(tooth.getLandmarks()[0][0])
                 y_2 = int(tooth.getLandmarks()[0][1])
             
-            cv2.line(img, (x ,y), (x_2, y_2), lineColor)
+            cv2.line(img, (x ,y), (x_2, y_2), lineColor, thickness)
         return img
 
     def createMeanModelPresentationImages(self, statisticalModel):
@@ -192,8 +197,8 @@ class FrameFactory:
         pca = PCA()
 
         for i in range(8):
-            height = 360
-            width = 320
+            height = 3840
+            width = 2160
             img = np.zeros((height,width,3), np.uint8)
             meanModel = toothModels[i].getMeanModel(deepCopy=True)
             flatModel = meanModel.flatten()
@@ -204,10 +209,12 @@ class FrameFactory:
             meanTooth.scale(height)
             meanTooth.translate([width/2, height/2])
 
-            for i in range(len(eigenvalues)):
+            for j in range(len(eigenvalues)):
                 
+                img_2 = deepcopy(img)
+
                 maxChangeVector = np.zeros(np.array(eigenvalues).shape)
-                maxChangeVector[i] = 500*eigenvalues[i]
+                maxChangeVector[j] = 100*eigenvalues[j]*(5*j+1)
                 maxChange = pca.reconstruct(maxChangeVector, eigenvectors, deepcopy(flatModel))
                 maxChange = maxChange.reshape((maxChange.shape[0] // 2, 2))
                 maxChangeTooth = Tooth(maxChange)
@@ -215,18 +222,63 @@ class FrameFactory:
                 maxChangeTooth.translate([width/2, height/2])
 
                 minChangeVector = np.zeros(np.array(eigenvalues).shape)
-                minChangeVector[i] = -500*(eigenvalues[i])
+                minChangeVector[j] = -100*(eigenvalues[j])*(5*j+1)
                 minChange = pca.reconstruct(minChangeVector, eigenvectors, deepcopy(flatModel))
                 minChange = minChange.reshape((minChange.shape[0] // 2, 2))
                 minChangeTooth = Tooth(minChange)
                 minChangeTooth.scale(height)
                 minChangeTooth.translate([width/2, height/2])
 
-                img = self._drawToothContourOnImage(meanTooth, img, lineColor=(255,255,255))
-                img = self._drawToothContourOnImage(maxChangeTooth, img, lineColor=(255,255,255))
-                img = self._drawToothContourOnImage(minChangeTooth, img, lineColor=(255,255,255))
-                cv2.imshow("Mean Model", img)
+                # img_2 = self._drawToothContourOnImage(meanTooth, img_2, lineColor=(255,255,255))
+                img_2 = self._drawToothContourOnImage(maxChangeTooth, img_2, lineColor=(255,255,255))
+                img_2 = self._drawToothContourOnImage(minChangeTooth, img_2, lineColor=(255,255,255))
 
+                height = img_2.shape[0]
+                width = img_2.shape[1]
+                img_2 = cv2.resize(img_2, (int(width*0.1), int(height*0.1)), interpolation = cv2.INTER_AREA)
+
+                # img_2 = Filter.process_image(img_2)
+
+                filename = "Results/mean_model_modes_adjusted/tooth_{0}_mode_{1}.jpg".format(i,j)
+                cv2.imwrite(filename, img_2)
+
+                cv2.imshow("Mean Model", img_2)
+
+    def createFittingErrorPresentationImages(self, fittedModels, radiograph):
+        
+        img = radiograph.getImage()
+        img = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
+
+        teeth = radiograph.getTeeth()
+        for i in range(8):
+
+            totalError = 0.0
+            numberOfGoodPixels = 0
+
+            tooth = teeth[i]
+            model = fittedModels[i]
+            img = self._drawToothContourOnImage(tooth, img, lineColor=(0,255,0), thickness=1)
+            img = self._drawToothContourOnImage(model, img, lineColor=(255,0,0), thickness=1)
+            
+            for j in range(40):
+                p1 = tooth.getLandmarks()[j]
+                p2 = model.getLandmarks()[j]
+                x1 = int(p1[0])
+                y1 = int(p1[1])
+                x2 = int(p2[0])
+                y2 = int(p2[1])
+                img = cv2.line(img, (x1,y1), (x2,y2), (0,0,255))
+                totalError += math.sqrt((x1-x2)**2 + (y1-y2)**2)
+
+                if abs(x1+x2) + abs(y1-y2) <= 2:
+                    numberOfGoodPixels += 1
+
+            print("Average pixel position error for tooth " + str(i) + " is: " + str(totalError/40))
+            print("Number of good pixels: " + str(numberOfGoodPixels))
+
+        cv2.imshow("test", img)
+
+        return img
 
 
 

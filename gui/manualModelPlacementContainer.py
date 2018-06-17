@@ -22,6 +22,7 @@ class ManualModelPlacementContainer(tk.Frame):
 
         self.currentMeanModel = 0
         self.modelCenters = np.zeros((8,2))
+        self.modelRotations = np.zeros((8,))
         self.currentRadiograph = 0
         self.radioImages = self.frameFactory.createRadiographFrames(self, drawLandmarks=False)
         self.show()
@@ -46,14 +47,32 @@ class ManualModelPlacementContainer(tk.Frame):
                                                                 self.currentRadiograph,
                                                                 self.meanModels,
                                                                 self.currentMeanModel,
-                                                                self.modelCenters)[0]
+                                                                self.modelCenters,
+                                                                self.modelRotations)[0]
                     self.show()
+
+    def drawRotatedModelOnFrame(self, rotation):
+        self.modelRotations[self.currentMeanModel] = rotation      
+        self.radioImages[self.currentRadiograph] =\
+            self.frameFactory.drawToothModelOnFrame(self,
+                                                    self.currentRadiograph,
+                                                    self.meanModels,
+                                                    self.currentMeanModel,
+                                                    self.modelCenters,
+                                                    self.modelRotations)[0]
+        self.show()
+
+    def manualRotation(self, rotation):
+        self.drawRotatedModelOnFrame(rotation=rotation)
 
     def getChosenRadiograph(self):
         return self.currentRadiograph
 
     def getChosenModelPositions(self):
         return self.modelCenters
+
+    def getChosenModelRotations(self):
+        return self.modelRotations
 
     def bindFrames(self, parent):
         for frame in self.radioImages:

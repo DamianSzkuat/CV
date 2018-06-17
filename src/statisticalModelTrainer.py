@@ -23,13 +23,17 @@ class StatisticalModelTrainer:
         self.modelFitter = ModelFitter()
         self.multiResTrainer = MultiResolutionTrainer()
 
-    def trainCompleteStatisticalModel(self, k_pixels, resolutionLevels, filter_settings, doLeaveOneOutTrainingSetTest=False):
+    def trainCompleteStatisticalModel(self, k_pixels, resolutionLevels, filter_settings, doLeaveOneOutTrainingSetTest=False, leaveOneOut=None):
         """
         Performs leave-one-out validation of the training set, then 
         trains a statistical model from the entire training set.
         """
         if doLeaveOneOutTrainingSetTest:
             self.doLeaveOneOutTrainingSetValidation()
+
+        if leaveOneOut is not None:
+            self.completeDataHandler = DataHandler(leave_one_out=leaveOneOut)
+            
         statisticalToothModels = self.trainModelFromCompleteTrainingSet()
 
         grayLevelMultiResModel = self.multiResTrainer.trainGrayLevelMultiResolutionModel(k_pixels, resolutionLevels, filter_settings)

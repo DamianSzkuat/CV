@@ -14,13 +14,14 @@ from src.statisticalToothModel import StatisticalToothModel
 
 class MultiResolutionActiveShapeModel:
 
-    def __init__(self, completeStatisticalModel, resolutionLevels=3, m_pixels=None, k_pixels=None, filter_settings=None, initialPositions=None):
+    def __init__(self, completeStatisticalModel, resolutionLevels=3, m_pixels=None, k_pixels=None, filter_settings=None, initialPositions=None, initialRotations=None):
         self.completeStatisticalModel = completeStatisticalModel
         self.procrustes = Procrustes()
         self.pca = PCA()    
         self.m_pixels = m_pixels
         self.k_pixels = k_pixels
         self.resolutionLevels = resolutionLevels
+        self.initialRotations = initialRotations
         self.initialPositions = self._prepareScaledInitialPositions(initialPositions)
         self.filter_settings = filter_settings
         
@@ -55,6 +56,9 @@ class MultiResolutionActiveShapeModel:
         # print("Downscaled radiographs: " + str(downscaledRadiographs.shape))
         radiograph = downscaledRadiographs[currentResolutionLevel]
 
+        # Get initial model rotations
+        initialModelRotation = self.initialRotations[toothIndex]
+
         # Get the initial model positions
         initialModelPosition = self.initialPositions[toothIndex]
         if initialModelPosition is None:
@@ -69,6 +73,7 @@ class MultiResolutionActiveShapeModel:
 
         # Initialize Y, this has to be better
         Y = deepcopy(mean)
+        Y.rotate(initialModelRotation*(math.pi/180))
         Y.scale(500/(2**(self.resolutionLevels-1)))
         #Y.scale(200)
         Y.translate(initialModelPosition)

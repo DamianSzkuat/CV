@@ -43,7 +43,7 @@ class Radiograph:
     def scaleImage(self, scale):
         height = self.image.shape[0]
         width = self.image.shape[1]
-        self.image = cv2.resize(self.image, (int(width*scale), int(height*scale)))
+        self.image = cv2.resize(self.image, (int(width*scale), int(height*scale)), interpolation = cv2.INTER_AREA)
         for tooth in self.teeth:
             tooth.scale(scale)
     
