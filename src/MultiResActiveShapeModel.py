@@ -108,7 +108,7 @@ class MultiResolutionActiveShapeModel:
 
         Y_copy = deepcopy(Y)
         i = 0
-        while i < 20:
+        while i < 100:
 
             X, b_new = self._modelFittingStep(Y, X, eigenvalues, eigenvectors, mean, scale)
             # print("X Step: " + str(X.getLandmarks()))
@@ -122,19 +122,19 @@ class MultiResolutionActiveShapeModel:
             Y = Tooth(Y)
             Y_copy = deepcopy(Y)
 
-            if ((np.isclose(b, b_new).all() and i>3) or (i>=(12/(currentResolutionLevel+1)))):
-                print("Breaking after " + str(i) + " iterations")
-                break
-            else:
-                b = b_new
-                i += 1
-
-            # if (p >=0.9 and i>2)  or i >= 5:
+            # if ((np.isclose(b, b_new).all() and i>3) or (i>=(12/(currentResolutionLevel+1)) and currentResolutionLevel > 0)):
             #     print("Breaking after " + str(i) + " iterations")
             #     break
             # else:
             #     b = b_new
             #     i += 1
+
+            if (p >=0.9 and i>2)  or i >= 5:
+                print("Breaking after " + str(i) + " iterations")
+                break
+            else:
+                b = b_new
+                i += 1
               
         return X, Y
 

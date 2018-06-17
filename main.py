@@ -46,8 +46,8 @@ class MainApp(tk.Tk):
 
         self.alignedTeeth = list()
         self.meanModels = list()
-        self.k_pixels = [13,7,3,2,1]
-        self.m_pixels = [25,15,7,3,2]
+        self.k_pixels = [13,7,2,2,1]
+        self.m_pixels = [25,15,4,3,2]
         self.resolutionLevels = 2
         self.filter_settings = [(3, 3, 6), (3, 3, 6), (3, 3, 6), (1, 2, 6), (1, 2, 3)]
 
@@ -87,7 +87,7 @@ class MainApp(tk.Tk):
         # cv2.imshow("Img5", img_5)
 
     def trainCompleteStatisticalModel(self):
-        self.statisticalModel = self.statisticalModelTrainer.trainCompleteStatisticalModel(self.k_pixels, self.resolutionLevels, self.filter_settings, leaveOneOut=11)
+        self.statisticalModel = self.statisticalModelTrainer.trainCompleteStatisticalModel(self.k_pixels, self.resolutionLevels, self.filter_settings, leaveOneOut=1)
 
         for i in range(8):
             maxEig = self.statisticalModel.getToothModelByIndex(i).getEigenvalues()[0]
